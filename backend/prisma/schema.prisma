@@ -1,0 +1,399 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum AuthProvider {
+  LOCAL
+  GOOGLE
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum WorkType {
+  REMOTE
+  ONSITE
+  HYBRID
+}
+
+enum Source {
+  ADZUNA
+  SKILLCAREERHUB
+  LINKEDIN
+  INDEED
+  COMPANY_WEBSITE
+  GLASSDOOR
+  GREENHOUSE
+  LEVER
+  ASHBY
+  OTHER
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERNSHIP
+  TEMPORARY
+  FREELANCE
+}
+
+enum ExperienceLevel {
+  ENTRY
+  JUNIOR
+  MID
+  SENIOR
+  LEAD
+  EXECUTIVE
+}
+
+enum ApplicationStatus {
+  SAVED
+  APPLIED
+  OA
+  INTERVIEW
+  FINAL_ROUND
+  OFFER
+  REJECTED
+  WITHDRAWN
+}
+
+enum SocialPlatform {
+  GITHUB
+  LINKEDIN
+  PORTFOLIO
+  X
+  MEDIUM
+  DEVTO
+  YOUTUBE
+  OTHER
+}
+
+enum NotificationType {
+  JOB_ALERT
+  SYSTEM
+}
+
+model User {
+  id          Int     @id @default(autoincrement())
+  username    String  @unique
+  email       String? @unique
+  phoneNumber String? @unique
+  password    String?
+
+  authProvider AuthProvider @default(LOCAL)
+  role         Role         @default(USER)
+
+  emailVerified Boolean @default(false)
+  phoneVerified Boolean @default(false)
+
+  accountEnabled Boolean @default(true)
+  accountLocked  Boolean @default(false)
+
+  failedLoginAttempts Int @default(0)
+
+  lastLoginAt       DateTime?
+  passwordChangedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  profile UserProfile?
+
+  oauthAccounts OAuthAccount[]
+  refreshTokens RefreshToken[]
+
+  jobPreferences UserJobPreferences?
+
+  preferredCompanies UserPreferredCompany[]
+
+  applications Application[]
+
+  notifications Notification[]
+  jobAlerts     JobAlert[]
+
+  @@map("users")
+}
+
+model UserSocialLink {
+  userId   Int
+  platform SocialPlatform
+  url      String
+
+  user UserProfile @relation(fields: [userId], references: [id])
+
+  @@id([userId, platform])
+  @@map("user_social_links")
+}
+
+model UserProfile {
+  id   Int  @id
+  user User @relation(fields: [id], references: [id])
+
+  name              String?
+  profilePictureUrl String?
+
+  yearsOfExperience Int?
+  currentLocation   String?
+
+  socialLinks UserSocialLink[]
+
+  workTypes UserWorkType[]
+  skills    UserSkill[]
+  locations UserLocation[]
+
+  @@map("user_profiles")
+}
+
+model UserWorkType {
+  userId   Int
+  workType WorkType
+
+  user UserProfile @relation(fields: [userId], references: [id])
+
+  @@id([userId, workType])
+  @@map("user_work_types")
+}
+
+model UserSkill {
+  userId Int
+  skill  String
+
+  user UserProfile @relation(fields: [userId], references: [id])
+
+  @@id([userId, skill])
+  @@map("user_skills")
+}
+
+model UserLocation {
+  userId   Int
+  location String
+
+  user UserProfile @relation(fields: [userId], references: [id])
+
+  @@id([userId, location])
+  @@map("user_locations")
+}
+
+model UserJobPreferences {
+  id Int @id @default(autoincrement())
+
+  userId       Int     @unique
+  emailEnabled Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  titles    UserJobPreferenceTitle[]
+  skills    UserJobPreferenceSkill[]
+  roleTypes UserJobPreferenceRoleType[]
+
+  @@map("user_job_preferences")
+}
+
+model UserJobPreferenceTitle {
+  preferenceId Int
+  title        String
+
+  preference UserJobPreferences @relation(fields: [preferenceId], references: [id])
+
+  @@id([preferenceId, title])
+  @@map("user_job_preference_titles")
+}
+
+model UserJobPreferenceSkill {
+  preferenceId Int
+  skill        String
+
+  preference UserJobPreferences @relation(fields: [preferenceId], references: [id])
+
+  @@id([preferenceId, skill])
+  @@map("user_job_preference_skills")
+}
+
+model UserJobPreferenceRoleType {
+  preferenceId Int
+  roleType     String
+
+  preference UserJobPreferences @relation(fields: [preferenceId], references: [id])
+
+  @@id([preferenceId, roleType])
+  @@map("user_job_preference_role_types")
+}
+
+model UserPreferredCompany {
+  id Int @id @default(autoincrement())
+
+  userId      Int
+  companyName String
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("user_preferred_companies")
+}
+
+model RefreshToken {
+  id Int @id @default(autoincrement())
+
+  userId Int
+  token  String @unique
+
+  expiryDate DateTime
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("refresh_tokens")
+}
+
+model OAuthAccount {
+  id Int @id @default(autoincrement())
+
+  userId Int
+
+  provider AuthProvider
+
+  providerUserId String?
+
+  accessToken  String?
+  refreshToken String?
+
+  tokenExpiresAt DateTime?
+
+  linkedAt DateTime? @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("oauth_accounts")
+}
+
+model Job {
+  id Int @id @default(autoincrement())
+
+  externalId String? @unique
+
+  source Source
+
+  company     String
+  companyLogo String?
+
+  title String
+
+  location String?
+
+  department String?
+
+  employmentType EmploymentType?
+
+  description String?
+
+  applyUrl String
+
+  postedAt DateTime?
+
+  isRemote Boolean @default(false)
+
+  experienceLevel ExperienceLevel?
+
+  minSalary Int @default(0)
+  maxSalary Int @default(0)
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  applications Application[]
+  jobAlerts    JobAlert[]
+
+  @@index([title])
+  @@index([company])
+  @@index([location])
+  @@index([postedAt])
+  @@index([isRemote])
+  @@map("jobs")
+}
+
+model Application {
+  id Int @id @default(autoincrement())
+
+  userId Int
+  jobId  Int
+
+  status ApplicationStatus @default(SAVED)
+
+  appliedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+  job  Job  @relation(fields: [jobId], references: [id])
+
+  notes ApplicationNote[]
+
+  @@unique([userId, jobId])
+  @@map("applications")
+}
+
+model ApplicationNote {
+  id Int @id @default(autoincrement())
+
+  applicationId Int
+
+  round    String?
+  notes    String?
+  feedback String?
+
+  createdAt DateTime @default(now())
+
+  application Application @relation(fields: [applicationId], references: [id])
+
+  @@map("application_notes")
+}
+
+model Notification {
+  id Int @id @default(autoincrement())
+
+  userId Int
+
+  title   String
+  message String
+
+  type NotificationType
+
+  isRead Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("notifications")
+}
+
+model JobAlert {
+  id Int @id @default(autoincrement())
+
+  userId Int
+  jobId  Int
+
+  emailSent Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  job  Job  @relation(fields: [jobId], references: [id])
+
+  @@unique([userId, jobId])
+  @@map("job_alerts")
+}
