@@ -1,0 +1,219 @@
+/**
+ * CareerForge API Client
+ * Uses Clerk's getToken() for Bearer auth on all protected routes.
+ * Base URL: process.env.NEXT_PUBLIC_API_BASE_URL
+ */
+
+const BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
+
+// ─── Core request function ───────────────────────────────────────────────────
+
+export async function apiRequest(
+  endpoint: string,
+  options: RequestInit = {},
+  getToken?: () => Promise<string | null>
+): Promise<Response> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...(options.headers as Record<string, string>),
+  };
+
+  if (getToken) {
+    const token = await getToken();
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const res = await fetch(`${BASE}${endpoint}`, { ...options, headers });
+  return res;
+}
+
+// ─── API factory that binds getToken ────────────────────────────────────────
+
+export function createApi(getToken: () => Promise<string | null>) {
+  const req = (endpoint: string, opts: RequestInit = {}) =>
+    apiRequest(endpoint, opts, getToken);
+
+  return {
+    // ── Jobs (public, no auth required) ─────────────────────────────────────
+    listJobs: (params?: Record<string, string | number | boolean | undefined>) => {
+      const q = params ? new URLSearchParams(
+        Object.fromEntries(
+          Object.entries(params)
+            .filter(([, v]) => v !== undefined && v !== "")
+            .map(([k, v]) => [k, String(v)])
+        )
+      ).toString() : "";
+      return req(`/api/v1/jobs${q ? `?${q}` : ""}`, { method: "GET" });
+    },
+
+    searchJobs: (params?: Record<string, string | number | boolean | undefined>) => {
+      const q = params ? new URLSearchParams(
+        Object.fromEntries(
+          Object.entries(params)
+            .filter(([, v]) => v !== undefined && v !== "")
+            .map(([k, v]) => [k, String(v)])
+        )
+      ).toString() : "";
+      return req(`/api/v1/jobs/search${q ? `?${q}` : ""}`, { method: "GET" });
+    },
+
+    getJob: (id: number | string) =>
+      req(`/api/v1/jobs/${id}`, { method: "GET" }),
+
+    // ── Applications (auth required) ─────────────────────────────────────────
+    createApplication: (jobId: number) =>
+      req("/api/v1/applications", {
+        method: "POST",
+        body: JSON.stringify({ jobId }),
+      }),
+
+    listApplications: (params?: { page?: number; limit?: number }) => {
+      const q = params ? new URLSearchParams(
+        Object.fromEntries(
+          Object.entries(params)
+            .filter(([, v]) => v !== undefined)
+            .map(([k, v]) => [k, String(v)])
+        )
+      ).toString() : "";
+      return req(`/api/v1/applications${q ? `?${q}` : ""}`, { method: "GET" });
+    },
+
+    getApplication: (id: number | string) =>
+      req(`/api/v1/applications/${id}`, { method: "GET" }),
+
+    updateApplicationStatus: (id: number | string, status: string) =>
+      req(`/api/v1/applications/${id}/status`, {
+        method: "PATCH",
+        body: JSON.stringify({ status }),
+      }),
+
+    createNote: (applicationId: number | string, content: string) =>
+      req(`/api/v1/applications/${applicationId}/notes`, {
+        method: "POST",
+        body: JSON.stringify({ content }),
+      }),
+
+    listNotes: (applicationId: number | string) =>
+      req(`/api/v1/applications/${applicationId}/notes`, { method: "GET" }),
+
+    // ── Dashboard ─────────────────────────────────────────────────────────────
+    getDashboard: () =>
+      req("/api/v1/dashboard", { method: "GET" }),
+
+    // ── Profile ───────────────────────────────────────────────────────────────
+    getProfile: () =>
+      req("/api/v1/profile", { method: "GET" }),
+
+    updateProfile: (data: Record<string, unknown>) =>
+      req("/api/v1/profile", {
+        method: "PUT",
+        body: JSON.stringify(data),
+      }),
+
+    updateSocialLinks: (links: Record<string, string>) =>
+      req("/api/v1/profile/social-links", {
+        method: "PUT",
+        body: JSON.stringify({ links }),
+      }),
+
+    addSkill: (skill: string) =>
+      req("/api/v1/profile/skills", {
+        method: "POST",
+        body: JSON.stringify({ skill }),
+      }),
+
+    removeSkill: (skill: string) =>
+      req(`/api/v1/profile/skills/${encodeURIComponent(skill)}`, {
+        method: "DELETE",
+      }),
+
+    // ── Preferences ───────────────────────────────────────────────────────────
+    getPreferences: () =>
+      req("/api/v1/preferences", { method: "GET" }),
+
+    updatePreferences: (data: Record<string, unknown>) =>
+      req("/api/v1/preferences", {
+        method: "PUT",
+        body: JSON.stringify(data),
+      }),
+
+    // ── AI Insights ───────────────────────────────────────────────────────────
+    interviewFailures: (body?: { limit?: number }) =>
+      req("/api/v1/ai/interview-failures", {
+        method: "POST",
+        body: JSON.stringify(body ?? {}),
+      }),
+
+    patternInsights: (body?: { limit?: number }) =>
+      req("/api/v1/ai/patterns", {
+        method: "POST",
+        body: JSON.stringify(body ?? {}),
+      }),
+
+    skillGaps: (body: { targetRole: string; targetSkills?: string[] }) =>
+      req("/api/v1/ai/skill-gaps", {
+        method: "POST",
+        body: JSON.stringify(body),
+      }),
+
+    roadmap: (body: { targetRole: string; weeks?: number }) =>
+      req("/api/v1/ai/roadmap", {
+        method: "POST",
+        body: JSON.stringify(body),
+      }),
+
+    // ── Chat / AI Search ──────────────────────────────────────────────────────
+    chatSearch: (query: string) =>
+      req("/api/v1/chat/search", {
+        method: "POST",
+        body: JSON.stringify({ query }),
+      }),
+
+    // ── Monitoring (public) ───────────────────────────────────────────────────
+    monitoringHealth: () =>
+      apiRequest("/api/v1/monitoring/health", { method: "GET" }),
+
+    monitoringRuns: () =>
+      apiRequest("/api/v1/monitoring/runs", { method: "GET" }),
+
+    monitoringRun: (runId: string) =>
+      apiRequest(`/api/v1/monitoring/runs/${runId}`, { method: "GET" }),
+
+    monitoringAggregates: () =>
+      apiRequest("/api/v1/monitoring/aggregates", { method: "GET" }),
+  };
+}
+
+// ─── Helper to unwrap JSON response ──────────────────────────────────────────
+
+export async function unwrap<T = unknown>(res: Response): Promise<T> {
+  if (!res.ok) {
+    let message = `HTTP ${res.status}`;
+    try {
+      const body = await res.json();
+      message = body?.message ?? message;
+    } catch { /* ignore */ }
+    throw new Error(message);
+  }
+  const json = await res.json();
+  // Backend wraps responses in { statusCode, data, message }
+  return (json?.data ?? json) as T;
+}
+
+/** Paginated list payloads from the Express API use `items`, not `jobs` / `applications`. */
+export type PaginatedPayload<T> = {
+  items?: T[];
+  jobs?: T[];
+  applications?: T[];
+  total?: number;
+  page?: number;
+  limit?: number;
+};
+
+export function extractItems<T>(
+  data: PaginatedPayload<T> | T[] | null | undefined
+): T[] {
+  if (!data) return [];
+  if (Array.isArray(data)) return data;
+  return data.items ?? data.jobs ?? data.applications ?? [];
+}
