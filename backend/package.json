@@ -6,7 +6,15 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "test": "vitest run",
+    "test-greenhouse": "tsx --tsconfig ../scripts/tsconfig.json ../scripts/ingestion/test-greenhouse.ts",
+    "ingest": "tsx --tsconfig ../scripts/tsconfig.json ../scripts/ingestion/job-ingestion.service.ts",
+    "ingest-greenhouse": "tsx --tsconfig ../scripts/tsconfig.json ../scripts/ingestion/test-greenhouse.ts",
+    "ingest-lever": "tsx --tsconfig ../scripts/tsconfig.json ../scripts/ingestion/lever-test.ts",
+    "ingest-ashby": "tsx --tsconfig ../scripts/tsconfig.json ../scripts/ingestion/ashby-test.ts",
+    "ingest-workday": "tsx --tsconfig ../scripts/tsconfig.json ../scripts/ingestion/workday-test.ts",
+    "ingest-company-sites": "tsx --tsconfig ../scripts/tsconfig.json ../scripts/ingestion/company-sites-test.ts"
   },
   "keywords": [],
   "author": "Shubhanshu Singh",
@@ -14,9 +22,9 @@
   "type": "module",
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "@clerk/clerk-sdk-node": "^5.1.1",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
-    "bcryptjs": "^3.0.3",
     "bullmq": "^5.77.6",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
@@ -24,23 +32,23 @@
     "express": "^5.2.1",
     "helmet": "^8.2.0",
     "ioredis": "^5.11.0",
-    "jsonwebtoken": "^9.0.3",
     "morgan": "^1.10.1",
     "pg": "^8.21.0",
     "prisma": "^7.8.0",
     "sib-api-v3-sdk": "^8.5.0",
-    "zod": "^4.4.3"
+    "zod": "^4.4.3",
+    "playwright": "^1.60.0"
   },
   "devDependencies": {
-    "@types/bcryptjs": "^2.4.6",
+    "@playwright/test": "^1.60.0",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
-    "@types/jsonwebtoken": "^9.0.10",
     "@types/morgan": "^1.9.10",
     "@types/node": "^25.9.1",
     "nodemon": "^3.1.14",
     "tsx": "^4.22.3",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitest": "^2.1.9"
   }
 }

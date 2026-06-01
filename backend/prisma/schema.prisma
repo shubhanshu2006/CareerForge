@@ -10,6 +10,7 @@ datasource db {
 enum AuthProvider {
   LOCAL
   GOOGLE
+  CLERK
 }
 
 enum Role {
@@ -24,15 +25,19 @@ enum WorkType {
 }
 
 enum Source {
-  ADZUNA
-  SKILLCAREERHUB
-  LINKEDIN
-  INDEED
-  COMPANY_WEBSITE
-  GLASSDOOR
   GREENHOUSE
   LEVER
   ASHBY
+  WORKDAY
+  COMPANY_WEBSITE
+  SKILLCAREERHUB
+
+  ADZUNA
+
+  LINKEDIN
+  INDEED
+  GLASSDOOR
+
   OTHER
 }
 
@@ -119,7 +124,27 @@ model User {
   notifications Notification[]
   jobAlerts     JobAlert[]
 
+  emailVerificationTokens  EmailVerificationToken[]
+  interviewFailureAnalyses InterviewFailureAnalysis[]
+  skillGapReports          SkillGapReport[]
+  preparationRoadmaps      PreparationRoadmap[]
+  patternInsights          PatternInsight[]
+
   @@map("users")
+}
+
+model EmailVerificationToken {
+  id Int @id @default(autoincrement())
+
+  userId Int
+  token  String @unique
+
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("email_verification_tokens")
 }
 
 model UserSocialLink {
@@ -281,8 +306,12 @@ model Job {
   id Int @id @default(autoincrement())
 
   externalId String? @unique
+  dedupeKey  String? @unique @map("dedupe_key")
 
   source Source
+
+  sourceJobId String?
+  sourceUrl   String?
 
   company     String
   companyLogo String?
@@ -301,6 +330,8 @@ model Job {
 
   postedAt DateTime?
 
+  fetchedAt DateTime @default(now())
+
   isRemote Boolean @default(false)
 
   experienceLevel ExperienceLevel?
@@ -316,11 +347,15 @@ model Job {
   applications Application[]
   jobAlerts    JobAlert[]
 
+  @@unique([source, sourceJobId])
   @@index([title])
   @@index([company])
+  @@index([company, title])
   @@index([location])
   @@index([postedAt])
   @@index([isRemote])
+  @@index([source])
+  @@index([sourceJobId])
   @@map("jobs")
 }
 
@@ -396,4 +431,100 @@ model JobAlert {
 
   @@unique([userId, jobId])
   @@map("job_alerts")
+}
+
+model InterviewFailureAnalysis {
+  id Int @id @default(autoincrement())
+
+  userId Int
+
+  summary   String
+  analysis  Json
+  noteCount Int
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+  @@map("interview_failure_analyses")
+}
+
+model SkillGapReport {
+  id Int @id @default(autoincrement())
+
+  userId Int
+
+  targetRole String
+  report     Json
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+  @@map("skill_gap_reports")
+}
+
+model PreparationRoadmap {
+  id Int @id @default(autoincrement())
+
+  userId Int
+
+  targetRole String
+  roadmap    Json
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+  @@map("preparation_roadmaps")
+}
+
+model PatternInsight {
+  id Int @id @default(autoincrement())
+
+  userId Int
+
+  insight Json
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+  @@map("pattern_insights")
+}
+
+// ─── Pipeline Monitoring ──────────────────────────────────────────────────────
+
+model IngestionRun {
+  id Int @id @default(autoincrement())
+
+  runId  String @unique
+  source String // "GREENHOUSE" | "LEVER" | "ASHBY" | "WORKDAY" | "COMPANY_WEBSITE" | "ALL"
+
+  startedAt   DateTime
+  completedAt DateTime?
+  durationMs  Int
+
+  totalFetched  Int @default(0)
+  totalInserted Int @default(0)
+  totalSkipped  Int @default(0)
+  totalFailed   Int @default(0)
+
+  alertsGenerated Int @default(0)
+  emailsEnqueued  Int @default(0)
+
+  // Per-company breakdown stored as JSON
+  companiesJson Json @default("[]")
+  // Error list stored as JSON
+  errorsJson    Json @default("[]")
+
+  createdAt DateTime @default(now())
+
+  @@index([source])
+  @@index([startedAt])
+  @@map("ingestion_runs")
 }
