@@ -10,8 +10,8 @@ export const healthCheck = asyncHandler(
         {
           status: "UP",
         },
-        "CareerForge API Running"
-      )
+        "CareerForge API Running",
+      ),
     );
-  }
+  },
 );
