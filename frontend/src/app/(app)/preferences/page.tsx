@@ -40,7 +40,7 @@ interface PreferencesApiResponse {
 }
 
 const labelStyle: React.CSSProperties = {
-  fontFamily: "var(--font-display)",
+  fontFamily: "var(--font-body)",
   fontWeight: 700,
   fontSize: "10px",
   letterSpacing: "0.12em",
@@ -145,14 +145,14 @@ export default function PreferencesPage() {
     }));
 
   const Tag = ({ label, onRemove }: { label: string; onRemove: () => void }) => (
-    <span style={{ display: "flex", alignItems: "center", gap: "6px", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "11px", letterSpacing: "0.06em", background: "var(--color-orange-dim)", color: "var(--color-orange)", border: "1px solid var(--color-orange-border)", padding: "4px 10px 4px 12px", borderRadius: "999px" }}>
+    <span style={{ display: "flex", alignItems: "center", gap: "6px", fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "11px", letterSpacing: "0.06em", background: "var(--color-orange-dim)", color: "var(--color-orange)", border: "1px solid var(--color-orange-border)", padding: "4px 10px 4px 12px", borderRadius: "999px" }}>
       {label}
       <button onClick={onRemove} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(249,115,22,0.6)", fontSize: "10px", display: "flex", alignItems: "center", padding: 0 }}><FaTimes /></button>
     </span>
   );
 
   const SuggestTag = ({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) => (
-    <button onClick={onClick} style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "11px", padding: "5px 12px", borderRadius: "999px", cursor: "pointer", transition: "all 0.2s", background: active ? "var(--color-orange-dim)" : "var(--color-surface-3)", color: active ? "var(--color-orange)" : "var(--color-white-40)", border: active ? "1px solid var(--color-orange-border)" : "1px solid var(--color-border)" }}>
+    <button onClick={onClick} style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "11px", padding: "5px 12px", borderRadius: "999px", cursor: "pointer", transition: "all 0.2s", background: active ? "var(--color-orange-dim)" : "var(--color-surface-3)", color: active ? "var(--color-orange)" : "var(--color-white-40)", border: active ? "1px solid var(--color-orange-border)" : "1px solid var(--color-border)" }}>
       {label}
     </button>
   );
@@ -169,7 +169,7 @@ export default function PreferencesPage() {
 
   const SectionCard = ({ title, children }: { title: string; children: React.ReactNode }) => (
     <div style={{ background: "var(--color-surface-2)", border: "1px solid var(--color-border)", borderRadius: "16px", padding: "24px", marginBottom: "20px" }}>
-      <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "16px", color: "var(--color-white)", margin: "0 0 20px", letterSpacing: "-0.015em" }}>{title}</h2>
+      <h2 style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "16px", color: "var(--color-white)", margin: "0 0 20px", letterSpacing: "-0.015em" }}>{title}</h2>
       {children}
     </div>
   );
@@ -184,7 +184,7 @@ export default function PreferencesPage() {
 
           <div style={{ marginBottom: "28px", display: "flex", alignItems: "flex-end", justifyContent: "space-between", flexWrap: "wrap", gap: "12px" }}>
             <div>
-              <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "clamp(22px, 3vw, 28px)", letterSpacing: "-0.025em", color: "var(--color-white)", margin: "0 0 6px" }}>Job Preferences</h1>
+              <h1 style={{ fontFamily: "var(--font-body)", fontWeight: 800, fontSize: "clamp(22px, 3vw, 28px)", letterSpacing: "-0.025em", color: "var(--color-white)", margin: "0 0 6px" }}>Job Preferences</h1>
               <p style={{ fontFamily: "var(--font-body)", fontSize: "14px", color: "var(--color-white-40)", margin: 0 }}>Tell us what you're looking for to get better alerts.</p>
             </div>
             <button onClick={handleSave} disabled={saving} className="btn-primary" style={{ gap: "8px" }}>
@@ -272,7 +272,7 @@ export default function PreferencesPage() {
                       onChange={() => toggleLocation(loc)}
                       style={{ accentColor: "var(--color-orange)", width: "16px", height: "16px" }}
                     />
-                    <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "13px", color: "var(--color-white-65)" }}>
+                    <span style={{ fontFamily: "var(--font-body)", fontWeight: 600, fontSize: "13px", color: "var(--color-white-65)" }}>
                       {loc}
                     </span>
                   </label>
@@ -285,7 +285,7 @@ export default function PreferencesPage() {
                   onChange={(e) => setPrefs((p) => ({ ...p, remoteOnly: e.target.checked }))}
                   style={{ accentColor: "var(--color-orange)", width: "16px", height: "16px" }}
                 />
-                <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "13px", color: "var(--color-white-65)" }}>
+                <span style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "13px", color: "var(--color-white-65)" }}>
                   Show remote positions only
                 </span>
               </label>
@@ -297,7 +297,7 @@ export default function PreferencesPage() {
             <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
               <label style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
                 <div>
-                  <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "14px", color: "var(--color-white)", margin: 0 }}>
+                  <p style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "14px", color: "var(--color-white)", margin: 0 }}>
                     Email Alerts
                   </p>
                   <p style={{ fontFamily: "var(--font-body)", fontSize: "12px", color: "var(--color-white-40)", margin: "3px 0 0" }}>
@@ -328,7 +328,7 @@ export default function PreferencesPage() {
                       key={freq}
                       onClick={() => setPrefs((p) => ({ ...p, alertFrequency: freq }))}
                       style={{
-                        fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "12px",
+                        fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "12px",
                         padding: "9px 16px", borderRadius: "8px", cursor: "pointer", transition: "all 0.2s",
                         background: prefs.alertFrequency === freq ? "var(--color-orange-dim)" : "var(--color-surface-3)",
                         color: prefs.alertFrequency === freq ? "var(--color-orange)" : "var(--color-white-40)",

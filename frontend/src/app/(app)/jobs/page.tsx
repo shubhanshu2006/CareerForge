@@ -154,7 +154,7 @@ export default function JobsPage() {
           background: var(--color-orange-dim);
           border: 1px solid var(--color-orange-border);
           color: var(--color-orange);
-          font-family: var(--font-display); font-weight: 700; font-size: 11px;
+          font-family: var(--font-body); font-weight: 700; font-size: 11px;
           cursor: pointer; transition: all 0.2s;
         }
       `}</style>
@@ -176,7 +176,7 @@ export default function JobsPage() {
           <div style={{ marginBottom: "24px" }}>
             <h1
               style={{
-                fontFamily: "var(--font-display)",
+                fontFamily: "var(--font-body)",
                 fontWeight: 800,
                 fontSize: "clamp(22px, 3vw, 28px)",
                 letterSpacing: "-0.025em",
@@ -215,7 +215,7 @@ export default function JobsPage() {
                     border: `1px solid ${active ? "var(--color-orange)" : "var(--color-border)"}`,
                     background: active ? "var(--color-orange)" : "var(--color-surface-2)",
                     color: active ? "#fff" : "var(--color-white-65)",
-                    fontFamily: "var(--font-display)",
+                    fontFamily: "var(--font-body)",
                     fontWeight: 700,
                     fontSize: "13px",
                     cursor: "pointer",
@@ -352,7 +352,7 @@ export default function JobsPage() {
               </select>
               {hasActiveFilters && (
                 <button type="button" onClick={clearFilters}
-                  style={{ display: "flex", alignItems: "center", gap: "5px", background: "none", border: "none", cursor: "pointer", color: "#f87171", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "12px" }}
+                  style={{ display: "flex", alignItems: "center", gap: "5px", background: "none", border: "none", cursor: "pointer", color: "#f87171", fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "12px" }}
                 >
                   <FaTimes style={{ fontSize: "10px" }} /> Clear
                 </button>
@@ -440,7 +440,7 @@ export default function JobsPage() {
               }}
             >
               <p style={{ fontSize: "48px", marginBottom: "16px" }}>🔍</p>
-              <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "18px", color: "var(--color-white)", margin: "0 0 8px" }}>
+              <h3 style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "18px", color: "var(--color-white)", margin: "0 0 8px" }}>
                 No jobs found
               </h3>
               <p style={{ fontFamily: "var(--font-body)", fontSize: "14px", color: "var(--color-white-40)" }}>

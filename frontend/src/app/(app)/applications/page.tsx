@@ -173,7 +173,7 @@ export default function ApplicationsPage() {
     <>
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
-        .status-tab { background: none; border: none; cursor: pointer; padding: 8px 14px; border-radius: 8px; font-family: var(--font-display); font-weight: 700; font-size: 12px; letter-spacing: 0.04em; transition: all 0.2s; white-space: nowrap; }
+        .status-tab { background: none; border: none; cursor: pointer; padding: 8px 14px; border-radius: 8px; font-family: var(--font-body); font-weight: 700; font-size: 12px; letter-spacing: 0.04em; transition: all 0.2s; white-space: nowrap; }
         .note-input { width: 100%; background: var(--color-surface-3); border: 1px solid var(--color-border); border-radius: 8px; padding: 9px 12px; font-size: 13px; color: var(--color-white); font-family: var(--font-body); outline: none; resize: none; transition: border-color 0.2s; box-sizing: border-box; }
         .note-input:focus { border-color: var(--color-orange); }
       `}</style>
@@ -189,7 +189,7 @@ export default function ApplicationsPage() {
       <div style={{ flex: 1, overflowY: "auto" }}>
         <div style={{ maxWidth: "1000px", margin: "0 auto", padding: "32px", boxSizing: "border-box" }}>
 
-          <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "clamp(22px, 3vw, 28px)", letterSpacing: "-0.025em", color: "var(--color-white)", margin: "0 0 6px" }}>
+          <h1 style={{ fontFamily: "var(--font-body)", fontWeight: 800, fontSize: "clamp(22px, 3vw, 28px)", letterSpacing: "-0.025em", color: "var(--color-white)", margin: "0 0 6px" }}>
             Applications
           </h1>
           <p style={{ fontFamily: "var(--font-body)", fontSize: "14px", color: "var(--color-white-40)", margin: "0 0 24px" }}>
@@ -226,10 +226,10 @@ export default function ApplicationsPage() {
           ) : filtered.length === 0 ? (
             <div style={{ textAlign: "center", padding: "64px", background: "var(--color-surface-2)", border: "1px solid var(--color-border)", borderRadius: "16px" }}>
               <p style={{ fontSize: "40px", marginBottom: "12px" }}>📋</p>
-              <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "16px", color: "var(--color-white)", margin: "0 0 8px" }}>
+              <p style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "16px", color: "var(--color-white)", margin: "0 0 8px" }}>
                 No applications {statusFilter !== "ALL" ? `with status "${statusFilter.replace(/_/g, " ")}"` : "yet"}
               </p>
-              <Link href="/jobs" style={{ color: "var(--color-orange)", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "13px" }}>
+              <Link href="/jobs" style={{ color: "var(--color-orange)", fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "13px" }}>
                 Browse jobs →
               </Link>
             </div>
@@ -258,7 +258,7 @@ export default function ApplicationsPage() {
                         width: "40px", height: "40px", borderRadius: "10px",
                         background: "var(--color-surface-3)", border: "1px solid var(--color-border)",
                         display: "flex", alignItems: "center", justifyContent: "center",
-                        fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "16px", color: "var(--color-orange)",
+                        fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "16px", color: "var(--color-orange)",
                         flexShrink: 0,
                       }}>
                         {(app.job?.companyName ?? app.job?.company ?? "?").charAt(0).toUpperCase()}
@@ -269,7 +269,7 @@ export default function ApplicationsPage() {
                         <Link
                           href={`/jobs/${app.job?.id}`}
                           style={{
-                            fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "15px",
+                            fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "15px",
                             color: "var(--color-white)", textDecoration: "none", display: "block",
                             overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                             transition: "color 0.2s",
@@ -299,7 +299,7 @@ export default function ApplicationsPage() {
                             borderRadius: "8px",
                             padding: "7px 28px 7px 10px",
                             color: "var(--color-white-65)",
-                            fontFamily: "var(--font-display)",
+                            fontFamily: "var(--font-body)",
                             fontWeight: 600,
                             fontSize: "11px",
                             cursor: "pointer",
@@ -331,7 +331,7 @@ export default function ApplicationsPage() {
                           display: "flex",
                           alignItems: "center",
                           gap: "5px",
-                          fontFamily: "var(--font-display)",
+                          fontFamily: "var(--font-body)",
                           fontWeight: 700,
                           fontSize: "11px",
                           transition: "all 0.2s",
@@ -372,7 +372,7 @@ export default function ApplicationsPage() {
                                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px", marginBottom: "6px" }}>
                                     <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
                                       {n.round && (
-                                        <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "10px", letterSpacing: "0.04em", padding: "2px 8px", borderRadius: "4px", background: "var(--color-orange-dim)", color: "var(--color-orange)", border: "1px solid var(--color-orange-border)" }}>
+                                        <span style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "10px", letterSpacing: "0.04em", padding: "2px 8px", borderRadius: "4px", background: "var(--color-orange-dim)", color: "var(--color-orange)", border: "1px solid var(--color-orange-border)" }}>
                                           {n.round}
                                         </span>
                                       )}
@@ -382,7 +382,7 @@ export default function ApplicationsPage() {
                                         </span>
                                       )}
                                       {n.overcome && (
-                                        <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "10px", letterSpacing: "0.04em", padding: "2px 8px", borderRadius: "4px", background: "rgba(74,222,128,0.12)", color: "rgb(74,222,128)", border: "1px solid rgba(74,222,128,0.3)" }}>
+                                        <span style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "10px", letterSpacing: "0.04em", padding: "2px 8px", borderRadius: "4px", background: "rgba(74,222,128,0.12)", color: "rgb(74,222,128)", border: "1px solid rgba(74,222,128,0.3)" }}>
                                           OVERCOME
                                         </span>
                                       )}
@@ -458,7 +458,7 @@ export default function ApplicationsPage() {
                                     display: "flex",
                                     alignItems: "center",
                                     gap: "6px",
-                                    fontFamily: "var(--font-display)",
+                                    fontFamily: "var(--font-body)",
                                     fontWeight: 700,
                                     fontSize: "12px",
                                   }}

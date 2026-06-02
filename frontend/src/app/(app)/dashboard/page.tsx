@@ -78,7 +78,7 @@ export default function DashboardPage() {
 
       <AppHeader
         left={
-          <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "13px", color: "var(--color-white-40)" }}>
+          <div style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "13px", color: "var(--color-white-40)" }}>
             {today}
           </div>
         }
@@ -91,7 +91,7 @@ export default function DashboardPage() {
           <div style={{ marginBottom: "32px" }}>
             <h1
               style={{
-                fontFamily: "var(--font-display)",
+                fontFamily: "var(--font-body)",
                 fontWeight: 800,
                 fontSize: "clamp(22px, 3vw, 30px)",
                 letterSpacing: "-0.025em",
@@ -140,12 +140,12 @@ export default function DashboardPage() {
                   justifyContent: "space-between",
                 }}
               >
-                <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "16px", color: "var(--color-white)", margin: 0 }}>
+                <h2 style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "16px", color: "var(--color-white)", margin: 0 }}>
                   Recent Activity
                 </h2>
                 <Link
                   href="/applications"
-                  style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "12px", color: "var(--color-orange)", textDecoration: "none" }}
+                  style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "12px", color: "var(--color-orange)", textDecoration: "none" }}
                 >
                   View All →
                 </Link>
@@ -159,7 +159,7 @@ export default function DashboardPage() {
                           key={h}
                           style={{
                             padding: "12px 20px",
-                            fontFamily: "var(--font-display)",
+                            fontFamily: "var(--font-body)",
                             fontWeight: 700,
                             fontSize: "10px",
                             letterSpacing: "0.12em",
@@ -190,7 +190,7 @@ export default function DashboardPage() {
                           <Link
                             href="/jobs"
                             style={{
-                              fontFamily: "var(--font-display)",
+                              fontFamily: "var(--font-body)",
                               fontWeight: 700,
                               fontSize: "13px",
                               color: "var(--color-orange)",
@@ -207,7 +207,7 @@ export default function DashboardPage() {
                             <Link
                               href={`/jobs/${app.job?.id}` as Route}
                               style={{
-                                fontFamily: "var(--font-display)",
+                                fontFamily: "var(--font-body)",
                                 fontWeight: 700,
                                 fontSize: "14px",
                                 color: "var(--color-white)",
@@ -250,7 +250,7 @@ export default function DashboardPage() {
               }}
             >
               <div style={{ padding: "20px", borderBottom: "1px solid var(--color-border)" }}>
-                <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "15px", color: "var(--color-white)", margin: 0 }}>
+                <h2 style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "15px", color: "var(--color-white)", margin: 0 }}>
                   Quick Actions
                 </h2>
               </div>
@@ -274,7 +274,7 @@ export default function DashboardPage() {
                       border: "1px solid var(--color-border)",
                       borderRadius: "10px",
                       textDecoration: "none",
-                      fontFamily: "var(--font-display)",
+                      fontFamily: "var(--font-body)",
                       fontWeight: 700,
                       fontSize: "12px",
                       color: "var(--color-white-65)",

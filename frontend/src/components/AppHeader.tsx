@@ -18,7 +18,7 @@ export default function AppHeader({ left }: AppHeaderProps) {
   const defaultLeft = (
     <div
       style={{
-        fontFamily: "var(--font-display)",
+        fontFamily: "var(--font-body)",
         fontWeight: 800,
         fontSize: "20px",
         color: "var(--color-white)",
@@ -80,7 +80,7 @@ export default function AppHeader({ left }: AppHeaderProps) {
         <p
           className="app-header-username"
           style={{
-            fontFamily: "var(--font-display)",
+            fontFamily: "var(--font-body)",
             fontWeight: 700,
             fontSize: "13px",
             color: "var(--color-white)",

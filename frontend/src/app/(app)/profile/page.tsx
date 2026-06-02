@@ -165,7 +165,7 @@ export default function ProfilePage() {
   const SectionCard = ({ title, children, action }: { title: string; children: React.ReactNode; action?: React.ReactNode }) => (
     <div style={{ background: "var(--color-surface-2)", border: "1px solid var(--color-border)", borderRadius: "16px", padding: "24px", marginBottom: "20px" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
-        <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "16px", color: "var(--color-white)", margin: 0, letterSpacing: "-0.015em" }}>{title}</h2>
+        <h2 style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "16px", color: "var(--color-white)", margin: 0, letterSpacing: "-0.015em" }}>{title}</h2>
         {action}
       </div>
       {children}
@@ -173,7 +173,7 @@ export default function ProfilePage() {
   );
 
   const FieldLabel = ({ label }: { label: string }) => (
-    <label style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-white-40)", display: "block", marginBottom: "6px" }}>
+    <label style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-white-40)", display: "block", marginBottom: "6px" }}>
       {label}
     </label>
   );
@@ -186,7 +186,7 @@ export default function ProfilePage() {
       <div style={{ flex: 1, overflowY: "auto" }}>
         <div style={{ maxWidth: "760px", margin: "0 auto", padding: "32px", boxSizing: "border-box" }}>
 
-          <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "clamp(22px, 3vw, 28px)", letterSpacing: "-0.025em", color: "var(--color-white)", margin: "0 0 24px" }}>
+          <h1 style={{ fontFamily: "var(--font-body)", fontWeight: 800, fontSize: "clamp(22px, 3vw, 28px)", letterSpacing: "-0.025em", color: "var(--color-white)", margin: "0 0 24px" }}>
             Profile
           </h1>
 
@@ -198,7 +198,7 @@ export default function ProfilePage() {
               style={{ width: "72px", height: "72px", borderRadius: "50%", border: "3px solid var(--color-orange-border)", objectFit: "cover", flexShrink: 0 }}
             />
             <div>
-              <p style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "20px", color: "var(--color-white)", margin: "0 0 4px", letterSpacing: "-0.02em" }}>
+              <p style={{ fontFamily: "var(--font-body)", fontWeight: 800, fontSize: "20px", color: "var(--color-white)", margin: "0 0 4px", letterSpacing: "-0.02em" }}>
                 {name}
               </p>
               <p style={{ fontFamily: "var(--font-body)", fontSize: "13px", color: "var(--color-white-40)", margin: "0 0 8px" }}>
@@ -277,7 +277,7 @@ export default function ProfilePage() {
                   key={s}
                   onClick={() => (profile.skills ?? []).includes(s) ? handleRemoveSkill(s) : (setNewSkill(s), setTimeout(() => handleAddSkill(), 0))}
                   style={{
-                    fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "11px", padding: "5px 12px", borderRadius: "999px", cursor: "pointer", transition: "all 0.2s",
+                    fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "11px", padding: "5px 12px", borderRadius: "999px", cursor: "pointer", transition: "all 0.2s",
                     background: (profile.skills ?? []).includes(s) ? "var(--color-orange-dim)" : "var(--color-surface-3)",
                     color: (profile.skills ?? []).includes(s) ? "var(--color-orange)" : "var(--color-white-40)",
                     border: (profile.skills ?? []).includes(s) ? "1px solid var(--color-orange-border)" : "1px solid var(--color-border)",
@@ -306,7 +306,7 @@ export default function ProfilePage() {
             {(profile.skills ?? []).length > 0 && (
               <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                 {(profile.skills ?? []).map((s) => (
-                  <span key={s} style={{ display: "flex", alignItems: "center", gap: "6px", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "11px", background: "var(--color-orange-dim)", color: "var(--color-orange)", border: "1px solid var(--color-orange-border)", padding: "4px 10px 4px 12px", borderRadius: "999px" }}>
+                  <span key={s} style={{ display: "flex", alignItems: "center", gap: "6px", fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "11px", background: "var(--color-orange-dim)", color: "var(--color-orange)", border: "1px solid var(--color-orange-border)", padding: "4px 10px 4px 12px", borderRadius: "999px" }}>
                     {s}
                     <button onClick={() => handleRemoveSkill(s)} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(249,115,22,0.6)", fontSize: "10px", display: "flex", alignItems: "center", padding: 0 }}>
                       <FaTimes />

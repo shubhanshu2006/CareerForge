@@ -109,7 +109,7 @@ export default function OnboardingPage() {
     <button
       onClick={onClick}
       style={{
-        fontFamily: "var(--font-display)",
+        fontFamily: "var(--font-body)",
         fontWeight: 700,
         fontSize: "11px",
         letterSpacing: "0.05em",
@@ -136,7 +136,7 @@ export default function OnboardingPage() {
         display: "flex",
         alignItems: "center",
         gap: "6px",
-        fontFamily: "var(--font-display)",
+        fontFamily: "var(--font-body)",
         fontWeight: 700,
         fontSize: "11px",
         letterSpacing: "0.06em",
@@ -188,7 +188,7 @@ export default function OnboardingPage() {
       </div>
       <h1
         style={{
-          fontFamily: "var(--font-display)",
+          fontFamily: "var(--font-body)",
           fontWeight: 800,
           fontSize: "clamp(26px, 4vw, 34px)",
           letterSpacing: "-0.03em",
@@ -238,7 +238,7 @@ export default function OnboardingPage() {
         </div>
         <h2
           style={{
-            fontFamily: "var(--font-display)",
+            fontFamily: "var(--font-body)",
             fontWeight: 800,
             fontSize: "22px",
             color: "var(--color-white)",
@@ -256,7 +256,7 @@ export default function OnboardingPage() {
       <div style={{ marginBottom: "20px" }}>
         <p
           style={{
-            fontFamily: "var(--font-display)",
+            fontFamily: "var(--font-body)",
             fontWeight: 700,
             fontSize: "10px",
             letterSpacing: "0.12em",
@@ -301,7 +301,7 @@ export default function OnboardingPage() {
             color: "#818cf8",
             border: "1px solid rgba(99,102,241,0.30)",
             cursor: "pointer",
-            fontFamily: "var(--font-display)",
+            fontFamily: "var(--font-body)",
             fontWeight: 700,
             fontSize: "12px",
             whiteSpace: "nowrap",
@@ -315,7 +315,7 @@ export default function OnboardingPage() {
         <div style={{ marginTop: "16px" }}>
           <p
             style={{
-              fontFamily: "var(--font-display)",
+              fontFamily: "var(--font-body)",
               fontWeight: 700,
               fontSize: "10px",
               letterSpacing: "0.12em",
@@ -357,7 +357,7 @@ export default function OnboardingPage() {
         </div>
         <h2
           style={{
-            fontFamily: "var(--font-display)",
+            fontFamily: "var(--font-body)",
             fontWeight: 800,
             fontSize: "22px",
             color: "var(--color-white)",
@@ -375,7 +375,7 @@ export default function OnboardingPage() {
       <div style={{ marginBottom: "20px" }}>
         <p
           style={{
-            fontFamily: "var(--font-display)",
+            fontFamily: "var(--font-body)",
             fontWeight: 700,
             fontSize: "10px",
             letterSpacing: "0.12em",
@@ -420,7 +420,7 @@ export default function OnboardingPage() {
             color: "var(--color-orange)",
             border: "1px solid var(--color-orange-border)",
             cursor: "pointer",
-            fontFamily: "var(--font-display)",
+            fontFamily: "var(--font-body)",
             fontWeight: 700,
             fontSize: "12px",
             whiteSpace: "nowrap",
@@ -461,7 +461,7 @@ export default function OnboardingPage() {
         </div>
         <h2
           style={{
-            fontFamily: "var(--font-display)",
+            fontFamily: "var(--font-body)",
             fontWeight: 800,
             fontSize: "22px",
             color: "var(--color-white)",
@@ -484,7 +484,7 @@ export default function OnboardingPage() {
               key={type}
               onClick={() => toggleRole(type)}
               style={{
-                fontFamily: "var(--font-display)",
+                fontFamily: "var(--font-body)",
                 fontWeight: 700,
                 fontSize: "12px",
                 letterSpacing: "0.05em",
@@ -558,7 +558,7 @@ export default function OnboardingPage() {
         {/* Logo */}
         <div
           style={{
-            fontFamily: "var(--font-display)",
+            fontFamily: "var(--font-body)",
             fontWeight: 800,
             fontSize: "18px",
             letterSpacing: "-0.02em",
@@ -574,7 +574,7 @@ export default function OnboardingPage() {
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
             <span
               style={{
-                fontFamily: "var(--font-display)",
+                fontFamily: "var(--font-body)",
                 fontWeight: 700,
                 fontSize: "10px",
                 letterSpacing: "0.12em",
@@ -586,7 +586,7 @@ export default function OnboardingPage() {
             </span>
             <span
               style={{
-                fontFamily: "var(--font-display)",
+                fontFamily: "var(--font-body)",
                 fontWeight: 700,
                 fontSize: "10px",
                 letterSpacing: "0.08em",
@@ -625,7 +625,7 @@ export default function OnboardingPage() {
                   display: "flex",
                   alignItems: "center",
                   gap: "6px",
-                  fontFamily: "var(--font-display)",
+                  fontFamily: "var(--font-body)",
                   fontWeight: 700,
                   fontSize: "13px",
                   color: "var(--color-white-40)",
@@ -644,7 +644,7 @@ export default function OnboardingPage() {
               <button
                 onClick={handleSkip}
                 style={{
-                  fontFamily: "var(--font-display)",
+                  fontFamily: "var(--font-body)",
                   fontWeight: 700,
                   fontSize: "13px",
                   color: "var(--color-white-40)",
@@ -670,7 +670,7 @@ export default function OnboardingPage() {
               display: "flex",
               alignItems: "center",
               gap: "8px",
-              fontFamily: "var(--font-display)",
+              fontFamily: "var(--font-body)",
               fontWeight: 700,
               fontSize: "14px",
               color: "#000",

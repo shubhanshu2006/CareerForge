@@ -21,7 +21,7 @@ export default function LoginPage() {
           <Link
             href="/"
             style={{
-              fontFamily: "var(--font-display)",
+              fontFamily: "var(--font-body)",
               fontWeight: 800,
               fontSize: "22px",
               letterSpacing: "-0.02em",
@@ -37,7 +37,7 @@ export default function LoginPage() {
           <div style={{ position: "relative" }}>
             <h2
               style={{
-                fontFamily: "var(--font-display)",
+                fontFamily: "var(--font-body)",
                 fontWeight: 800,
                 fontSize: "clamp(26px, 3vw, 36px)",
                 letterSpacing: "-0.03em",

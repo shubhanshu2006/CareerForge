@@ -59,7 +59,7 @@ function OverviewRow({ icon, label, value }: { icon: React.ReactNode; label: str
         {icon}
       </div>
       <div>
-        <div style={{ fontFamily: "var(--font-display)", fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-white-40)", marginBottom: "2px" }}>
+        <div style={{ fontFamily: "var(--font-body)", fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-white-40)", marginBottom: "2px" }}>
           {label}
         </div>
         <div style={{ fontFamily: "var(--font-body)", fontSize: "14px", color: "var(--color-white-65)" }}>
@@ -147,7 +147,7 @@ export default function JobDetailPage() {
         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "80px 24px" }}>
           <div style={{ textAlign: "center" }}>
             <p style={{ fontSize: "48px" }}>😕</p>
-            <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "24px", color: "var(--color-white)", margin: "0 0 12px" }}>Job not found</h2>
+            <h2 style={{ fontFamily: "var(--font-body)", fontWeight: 800, fontSize: "24px", color: "var(--color-white)", margin: "0 0 12px" }}>Job not found</h2>
             <Link className="btn-ghost" href="/jobs">← Back to Jobs</Link>
           </div>
         </div>
@@ -160,7 +160,7 @@ export default function JobDetailPage() {
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       <AppHeader
         left={
-          <Link href="/jobs" style={{ display: "flex", alignItems: "center", gap: "8px", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "13px", color: "var(--color-white-65)", textDecoration: "none" }}
+          <Link href="/jobs" style={{ display: "flex", alignItems: "center", gap: "8px", fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "13px", color: "var(--color-white-65)", textDecoration: "none" }}
             onMouseEnter={(e) => (e.currentTarget.style.color = "var(--color-white)")}
             onMouseLeave={(e) => (e.currentTarget.style.color = "var(--color-white-65)")}
           >
@@ -177,11 +177,11 @@ export default function JobDetailPage() {
             <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "16px", flexWrap: "wrap" }}>
               {/* Logo + title */}
               <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-                <div style={{ width: "52px", height: "52px", borderRadius: "14px", background: "var(--color-surface-3)", border: "1px solid var(--color-border)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "22px", color: "var(--color-orange)", flexShrink: 0 }}>
+                <div style={{ width: "52px", height: "52px", borderRadius: "14px", background: "var(--color-surface-3)", border: "1px solid var(--color-border)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "22px", color: "var(--color-orange)", flexShrink: 0 }}>
                   {companyLabel.charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "clamp(18px, 2.5vw, 24px)", letterSpacing: "-0.025em", color: "var(--color-white)", margin: "0 0 4px" }}>
+                  <h1 style={{ fontFamily: "var(--font-body)", fontWeight: 800, fontSize: "clamp(18px, 2.5vw, 24px)", letterSpacing: "-0.025em", color: "var(--color-white)", margin: "0 0 4px" }}>
                     {job.title}
                   </h1>
                   <p style={{ fontFamily: "var(--font-body)", fontSize: "14px", color: "var(--color-orange)", fontWeight: 500, margin: 0 }}>
@@ -192,7 +192,7 @@ export default function JobDetailPage() {
 
               {/* Action buttons */}
               <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
-                <button style={{ display: "flex", alignItems: "center", gap: "6px", background: "var(--color-surface-3)", border: "1px solid var(--color-border)", borderRadius: "10px", padding: "10px 16px", color: "var(--color-white-65)", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "13px", cursor: "pointer" }}>
+                <button style={{ display: "flex", alignItems: "center", gap: "6px", background: "var(--color-surface-3)", border: "1px solid var(--color-border)", borderRadius: "10px", padding: "10px 16px", color: "var(--color-white-65)", fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "13px", cursor: "pointer" }}>
                   <FaBookmark style={{ fontSize: "11px" }} /> Save Job
                 </button>
 
@@ -202,7 +202,7 @@ export default function JobDetailPage() {
                     value={status}
                     disabled={actionLoading}
                     onChange={handleStatusChange}
-                    style={{ appearance: "none", background: "var(--color-surface-3)", border: "1px solid var(--color-border)", borderRadius: "10px", padding: "10px 36px 10px 16px", color: "var(--color-white-65)", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "13px", cursor: "pointer", outline: "none", opacity: actionLoading ? 0.5 : 1 }}
+                    style={{ appearance: "none", background: "var(--color-surface-3)", border: "1px solid var(--color-border)", borderRadius: "10px", padding: "10px 36px 10px 16px", color: "var(--color-white-65)", fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "13px", cursor: "pointer", outline: "none", opacity: actionLoading ? 0.5 : 1 }}
                   >
                     {STATUS_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
                   </select>
@@ -225,12 +225,12 @@ export default function JobDetailPage() {
                 </span>
               )}
               {job.employmentType && (
-                <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "11px", background: "var(--color-surface-3)", border: "1px solid var(--color-border)", padding: "4px 10px", borderRadius: "999px", color: "var(--color-white-65)", letterSpacing: "0.04em" }}>
+                <span style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "11px", background: "var(--color-surface-3)", border: "1px solid var(--color-border)", padding: "4px 10px", borderRadius: "999px", color: "var(--color-white-65)", letterSpacing: "0.04em" }}>
                   {job.employmentType.replace(/_/g, " ")}
                 </span>
               )}
               {job.source && (
-                <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "11px", background: "var(--color-surface-3)", border: "1px solid var(--color-border)", padding: "4px 10px", borderRadius: "999px", color: "var(--color-white-65)", letterSpacing: "0.04em" }}>
+                <span style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "11px", background: "var(--color-surface-3)", border: "1px solid var(--color-border)", padding: "4px 10px", borderRadius: "999px", color: "var(--color-white-65)", letterSpacing: "0.04em" }}>
                   {job.source}
                 </span>
               )}
@@ -248,7 +248,7 @@ export default function JobDetailPage() {
             {/* Left — description */}
             <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
               <div style={{ background: "var(--color-surface-2)", border: "1px solid var(--color-border)", borderRadius: "16px", padding: "28px" }}>
-                <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "17px", color: "var(--color-white)", margin: "0 0 16px", letterSpacing: "-0.02em" }}>
+                <h2 style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "17px", color: "var(--color-white)", margin: "0 0 16px", letterSpacing: "-0.02em" }}>
                   Job Description
                 </h2>
                 {job.description ? (
@@ -265,7 +265,7 @@ export default function JobDetailPage() {
 
             {/* Right — overview sidebar */}
             <div style={{ background: "var(--color-surface-2)", border: "1px solid var(--color-border)", borderRadius: "16px", padding: "24px" }}>
-              <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "17px", color: "var(--color-white)", margin: "0 0 4px", letterSpacing: "-0.02em" }}>
+              <h2 style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "17px", color: "var(--color-white)", margin: "0 0 4px", letterSpacing: "-0.02em" }}>
                 Job Overview
               </h2>
               <div style={{ borderTop: "1px solid var(--color-border)", marginTop: "8px" }}>

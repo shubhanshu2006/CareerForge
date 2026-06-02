@@ -92,7 +92,7 @@ export default function MonitoringPage() {
 
   const SectionCard = ({ title, children }: { title: string; children: React.ReactNode }) => (
     <div style={{ background: "var(--color-surface-2)", border: "1px solid var(--color-border)", borderRadius: "16px", padding: "24px", marginBottom: "20px" }}>
-      <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "16px", color: "var(--color-white)", margin: "0 0 20px", letterSpacing: "-0.015em" }}>{title}</h2>
+      <h2 style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "16px", color: "var(--color-white)", margin: "0 0 20px", letterSpacing: "-0.015em" }}>{title}</h2>
       {children}
     </div>
   );
@@ -114,7 +114,7 @@ export default function MonitoringPage() {
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "6px" }}>
                 <FaHeartbeat style={{ fontSize: "18px", color: "#4ade80" }} />
-                <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "clamp(22px, 3vw, 28px)", letterSpacing: "-0.025em", color: "var(--color-white)", margin: 0 }}>
+                <h1 style={{ fontFamily: "var(--font-body)", fontWeight: 800, fontSize: "clamp(22px, 3vw, 28px)", letterSpacing: "-0.025em", color: "var(--color-white)", margin: 0 }}>
                   Monitoring
                 </h1>
               </div>
@@ -145,7 +145,7 @@ export default function MonitoringPage() {
                   <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                       <FaCheckCircle style={{ color: "#4ade80", fontSize: "16px" }} />
-                      <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "15px", color: "#4ade80" }}>Healthy</span>
+                      <span style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "15px", color: "#4ade80" }}>Healthy</span>
                     </div>
                     {health.last24Hours && (
                       <p style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--color-white-40)", margin: 0 }}>
@@ -156,7 +156,7 @@ export default function MonitoringPage() {
                 ) : (
                   <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                     <FaExclamationTriangle style={{ color: "#fbbf24", fontSize: "14px" }} />
-                    <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "15px", color: "#fbbf24" }}>Unknown</span>
+                    <span style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "15px", color: "#fbbf24" }}>Unknown</span>
                   </div>
                 )}
               </SectionCard>
@@ -176,7 +176,7 @@ export default function MonitoringPage() {
                         <p style={{ fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: "22px", color: s.color, margin: "0 0 4px" }}>
                           {s.raw ? s.value : typeof s.value === "number" ? s.value.toLocaleString() : s.value}
                         </p>
-                        <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-white-40)", margin: 0 }}>
+                        <p style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-white-40)", margin: 0 }}>
                           {s.label}
                         </p>
                       </div>
@@ -197,7 +197,7 @@ export default function MonitoringPage() {
                       <thead>
                         <tr style={{ borderBottom: "1px solid var(--color-border)" }}>
                           {["Source", "Status", "Jobs Found", "New Jobs", "Duration", "Started"].map((h) => (
-                            <th key={h} style={{ padding: "10px 14px", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-white-40)", textAlign: "left", whiteSpace: "nowrap" }}>{h}</th>
+                            <th key={h} style={{ padding: "10px 14px", fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-white-40)", textAlign: "left", whiteSpace: "nowrap" }}>{h}</th>
                           ))}
                         </tr>
                       </thead>
@@ -209,11 +209,11 @@ export default function MonitoringPage() {
                           const statusColor = status === "success" ? "#4ade80" : status === "partial" ? "#fbbf24" : "#60a5fa";
                           return (
                           <tr key={run.runId ?? run.id ?? i} className="run-row">
-                            <td style={{ padding: "12px 14px", fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "13px", color: "var(--color-white)", whiteSpace: "nowrap" }}>
+                            <td style={{ padding: "12px 14px", fontFamily: "var(--font-body)", fontWeight: 600, fontSize: "13px", color: "var(--color-white)", whiteSpace: "nowrap" }}>
                               {run.source ?? "—"}
                             </td>
                             <td style={{ padding: "12px 14px" }}>
-                              <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "11px", color: statusColor, background: `${statusColor}18`, padding: "3px 8px", borderRadius: "999px", border: `1px solid ${statusColor}40` }}>
+                              <span style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "11px", color: statusColor, background: `${statusColor}18`, padding: "3px 8px", borderRadius: "999px", border: `1px solid ${statusColor}40` }}>
                                 {status.toUpperCase()}
                               </span>
                             </td>

@@ -164,21 +164,21 @@ export default function WeaknessesPage() {
           <div style={{ padding: "20px", borderBottom: "1px solid var(--color-border)" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "14px" }}>
               <FaShieldAlt style={{ color: "var(--color-orange)", fontSize: "16px" }} />
-              <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "15px", color: "var(--color-white)", margin: 0 }}>
+              <h2 style={{ fontFamily: "var(--font-body)", fontWeight: 800, fontSize: "15px", color: "var(--color-white)", margin: 0 }}>
                 Skill Gap
               </h2>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px", marginBottom: "12px" }}>
               <div style={{ padding: "8px 6px", background: "var(--color-surface-2)", border: "1px solid var(--color-border)", borderRadius: "8px", textAlign: "center" }}>
-                <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "18px", color: "var(--color-white)" }}>{stats.total}</div>
+                <div style={{ fontFamily: "var(--font-body)", fontWeight: 800, fontSize: "18px", color: "var(--color-white)" }}>{stats.total}</div>
                 <div style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "var(--color-white-40)", letterSpacing: "0.05em" }}>TOTAL</div>
               </div>
               <div style={{ padding: "8px 6px", background: "rgba(248,113,113,0.06)", border: "1px solid rgba(248,113,113,0.20)", borderRadius: "8px", textAlign: "center" }}>
-                <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "18px", color: "rgb(252,165,165)" }}>{stats.open}</div>
+                <div style={{ fontFamily: "var(--font-body)", fontWeight: 800, fontSize: "18px", color: "rgb(252,165,165)" }}>{stats.open}</div>
                 <div style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "var(--color-white-40)", letterSpacing: "0.05em" }}>OPEN</div>
               </div>
               <div style={{ padding: "8px 6px", background: "rgba(74,222,128,0.06)", border: "1px solid rgba(74,222,128,0.20)", borderRadius: "8px", textAlign: "center" }}>
-                <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "18px", color: "rgb(74,222,128)" }}>{stats.overcome}</div>
+                <div style={{ fontFamily: "var(--font-body)", fontWeight: 800, fontSize: "18px", color: "rgb(74,222,128)" }}>{stats.overcome}</div>
                 <div style={{ fontFamily: "var(--font-mono)", fontSize: "9px", color: "var(--color-white-40)", letterSpacing: "0.05em" }}>DONE</div>
               </div>
             </div>
@@ -253,7 +253,7 @@ export default function WeaknessesPage() {
                     }}
                   >
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "6px", marginBottom: "4px" }}>
-                      <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "12px", color: "var(--color-white)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      <span style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "12px", color: "var(--color-white)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                         {n.application?.job?.company ?? "Unknown"}
                       </span>
                       {n.overcome ? (
@@ -285,7 +285,7 @@ export default function WeaknessesPage() {
           {loading ? null : !selected ? (
             <div style={{ maxWidth: "600px", margin: "60px auto", textAlign: "center", background: "var(--color-surface-2)", border: "1px solid var(--color-border)", borderRadius: "16px", padding: "60px 32px" }}>
               <FaShieldAlt style={{ fontSize: "40px", color: "var(--color-orange)", marginBottom: "16px" }} />
-              <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "20px", color: "var(--color-white)", margin: "0 0 8px" }}>
+              <h2 style={{ fontFamily: "var(--font-body)", fontWeight: 800, fontSize: "20px", color: "var(--color-white)", margin: "0 0 8px" }}>
                 No weaknesses tracked yet
               </h2>
               <p style={{ fontFamily: "var(--font-body)", fontSize: "13px", color: "var(--color-white-40)", margin: "0 0 20px" }}>
@@ -300,7 +300,7 @@ export default function WeaknessesPage() {
                   border: "1px solid var(--color-orange-border)",
                   borderRadius: "8px",
                   color: "var(--color-orange)",
-                  fontFamily: "var(--font-display)",
+                  fontFamily: "var(--font-body)",
                   fontWeight: 700,
                   fontSize: "13px",
                   textDecoration: "none",
@@ -326,7 +326,7 @@ export default function WeaknessesPage() {
                       </>
                     )}
                   </div>
-                  <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "clamp(22px, 3vw, 28px)", color: "var(--color-white)", margin: 0, letterSpacing: "-0.02em" }}>
+                  <h1 style={{ fontFamily: "var(--font-body)", fontWeight: 800, fontSize: "clamp(22px, 3vw, 28px)", color: "var(--color-white)", margin: 0, letterSpacing: "-0.02em" }}>
                     <Link
                       href={`/jobs/${selected.application?.job?.id}`}
                       style={{ color: "inherit", textDecoration: "none" }}
@@ -347,7 +347,7 @@ export default function WeaknessesPage() {
                     borderRadius: "10px",
                     color: selected.overcome ? "rgb(74,222,128)" : "var(--color-orange)",
                     cursor: "pointer",
-                    fontFamily: "var(--font-display)",
+                    fontFamily: "var(--font-body)",
                     fontWeight: 700,
                     fontSize: "13px",
                     whiteSpace: "nowrap",
@@ -407,7 +407,7 @@ export default function WeaknessesPage() {
                 <Link
                   href="/applications"
                   style={{
-                    fontFamily: "var(--font-display)",
+                    fontFamily: "var(--font-body)",
                     fontWeight: 700,
                     fontSize: "12px",
                     color: "var(--color-orange)",

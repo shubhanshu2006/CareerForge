@@ -34,7 +34,7 @@ export default function StatusBadge({ status, size = "md" }: StatusBadgeProps) {
   return (
     <span
       style={{
-        fontFamily: "var(--font-display)",
+        fontFamily: "var(--font-body)",
         fontWeight: 700,
         fontSize: size === "sm" ? "10px" : "11px",
         letterSpacing: "0.06em",

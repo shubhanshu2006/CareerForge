@@ -175,7 +175,7 @@ export default function JobCard({ job, onStatusChange }: JobCardProps) {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            fontFamily: "var(--font-display)",
+            fontFamily: "var(--font-body)",
             fontWeight: 700,
             fontSize: "16px",
             color: "var(--color-orange)",
@@ -215,7 +215,7 @@ export default function JobCard({ job, onStatusChange }: JobCardProps) {
       {/* Title */}
       <h3
         style={{
-          fontFamily: "var(--font-display)",
+          fontFamily: "var(--font-body)",
           fontWeight: 700,
           fontSize: "15px",
           letterSpacing: "-0.01em",
@@ -307,7 +307,7 @@ export default function JobCard({ job, onStatusChange }: JobCardProps) {
             gap: "8px",
             cursor: "pointer",
             userSelect: "none",
-            fontFamily: "var(--font-display)",
+            fontFamily: "var(--font-body)",
             fontSize: "12px",
             fontWeight: 700,
             color: isTracked ? "#60a5fa" : "var(--color-white-40)",
@@ -346,7 +346,7 @@ export default function JobCard({ job, onStatusChange }: JobCardProps) {
               borderRadius: "6px",
               padding: "3px 22px 3px 8px",
               color: "var(--color-white-65)",
-              fontFamily: "var(--font-display)",
+              fontFamily: "var(--font-body)",
               fontWeight: 600,
               fontSize: "11px",
               cursor: "pointer",
@@ -395,7 +395,7 @@ export default function JobCard({ job, onStatusChange }: JobCardProps) {
         {statusStyle && (
           <span
             style={{
-              fontFamily: "var(--font-display)",
+              fontFamily: "var(--font-body)",
               fontWeight: 700,
               fontSize: "10px",
               letterSpacing: "0.06em",
@@ -423,7 +423,7 @@ export default function JobCard({ job, onStatusChange }: JobCardProps) {
             background: "transparent",
             border: "1px solid var(--color-border)",
             color: "var(--color-white-65)",
-            fontFamily: "var(--font-display)",
+            fontFamily: "var(--font-body)",
             fontWeight: 700,
             fontSize: "12px",
             textDecoration: "none",
@@ -453,7 +453,7 @@ export default function JobCard({ job, onStatusChange }: JobCardProps) {
               background: "var(--color-orange)",
               border: "none",
               color: "#000",
-              fontFamily: "var(--font-display)",
+              fontFamily: "var(--font-body)",
               fontWeight: 700,
               fontSize: "12px",
               textDecoration: "none",

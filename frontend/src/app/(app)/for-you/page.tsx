@@ -128,7 +128,7 @@ export default function ForYouPage() {
           <div style={{ marginBottom: "24px" }}>
             <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: "12px" }}>
               <div>
-                <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "clamp(22px, 3vw, 28px)", letterSpacing: "-0.025em", color: "var(--color-white)", margin: "0 0 6px", display: "flex", alignItems: "center", gap: "10px" }}>
+                <h1 style={{ fontFamily: "var(--font-body)", fontWeight: 800, fontSize: "clamp(22px, 3vw, 28px)", letterSpacing: "-0.025em", color: "var(--color-white)", margin: "0 0 6px", display: "flex", alignItems: "center", gap: "10px" }}>
                   <FaHeart style={{ color: "var(--color-orange)", fontSize: "22px" }} /> For You
                 </h1>
                 <p style={{ fontFamily: "var(--font-body)", fontSize: "14px", color: "var(--color-white-40)", margin: 0 }}>
@@ -145,12 +145,12 @@ export default function ForYouPage() {
             {(activeTitles.length > 0 || activeSkills.length > 0) && (
               <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "16px" }}>
                 {activeTitles.map((t) => (
-                  <span key={t} style={{ padding: "4px 12px", borderRadius: "999px", background: "var(--color-orange-dim)", border: "1px solid var(--color-orange-border)", color: "var(--color-orange)", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "11px" }}>
+                  <span key={t} style={{ padding: "4px 12px", borderRadius: "999px", background: "var(--color-orange-dim)", border: "1px solid var(--color-orange-border)", color: "var(--color-orange)", fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "11px" }}>
                     🎯 {t}
                   </span>
                 ))}
                 {activeSkills.map((s) => (
-                  <span key={s} style={{ padding: "4px 12px", borderRadius: "999px", background: "var(--color-surface-2)", border: "1px solid var(--color-border)", color: "var(--color-white-65)", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "11px" }}>
+                  <span key={s} style={{ padding: "4px 12px", borderRadius: "999px", background: "var(--color-surface-2)", border: "1px solid var(--color-border)", color: "var(--color-white-65)", fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "11px" }}>
                     🔧 {s}
                   </span>
                 ))}
@@ -162,7 +162,7 @@ export default function ForYouPage() {
           {noPrefs && (
             <div style={{ textAlign: "center", padding: "80px 0", background: "var(--color-surface-2)", border: "1px solid var(--color-border)", borderRadius: "16px" }}>
               <p style={{ fontSize: "48px", marginBottom: "16px" }}>🎯</p>
-              <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "18px", color: "var(--color-white)", margin: "0 0 8px" }}>No preferences set</h3>
+              <h3 style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "18px", color: "var(--color-white)", margin: "0 0 8px" }}>No preferences set</h3>
               <p style={{ fontFamily: "var(--font-body)", fontSize: "14px", color: "var(--color-white-40)", marginBottom: "24px" }}>
                 Add your preferred job titles and skills to get personalised recommendations.
               </p>
@@ -182,7 +182,7 @@ export default function ForYouPage() {
           {!loading && !noPrefs && jobs.length === 0 && (
             <div style={{ textAlign: "center", padding: "80px 0", background: "var(--color-surface-2)", border: "1px solid var(--color-border)", borderRadius: "16px" }}>
               <p style={{ fontSize: "48px", marginBottom: "16px" }}>🔍</p>
-              <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "18px", color: "var(--color-white)", margin: "0 0 8px" }}>No matches yet</h3>
+              <h3 style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "18px", color: "var(--color-white)", margin: "0 0 8px" }}>No matches yet</h3>
               <p style={{ fontFamily: "var(--font-body)", fontSize: "14px", color: "var(--color-white-40)" }}>
                 New jobs matching your preferences will appear here as they're ingested.
               </p>

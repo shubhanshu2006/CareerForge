@@ -79,7 +79,7 @@ export default function SavedPage() {
 
           <div style={{ marginBottom: "24px", display: "flex", alignItems: "flex-end", justifyContent: "space-between", flexWrap: "wrap", gap: "12px" }}>
             <div>
-              <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "clamp(22px, 3vw, 28px)", letterSpacing: "-0.025em", color: "var(--color-white)", margin: "0 0 6px" }}>
+              <h1 style={{ fontFamily: "var(--font-body)", fontWeight: 800, fontSize: "clamp(22px, 3vw, 28px)", letterSpacing: "-0.025em", color: "var(--color-white)", margin: "0 0 6px" }}>
                 Saved Jobs
               </h1>
               <p style={{ fontFamily: "var(--font-body)", fontSize: "14px", color: "var(--color-white-40)", margin: 0 }}>
@@ -98,7 +98,7 @@ export default function SavedPage() {
           ) : saved.length === 0 ? (
             <div style={{ textAlign: "center", padding: "80px 24px", background: "var(--color-surface-2)", border: "1px solid var(--color-border)", borderRadius: "16px" }}>
               <FaBookmark style={{ fontSize: "48px", color: "var(--color-white-20)", marginBottom: "16px" }} />
-              <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "20px", color: "var(--color-white)", margin: "0 0 8px" }}>
+              <h2 style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "20px", color: "var(--color-white)", margin: "0 0 8px" }}>
                 No saved jobs yet
               </h2>
               <p style={{ fontFamily: "var(--font-body)", fontSize: "14px", color: "var(--color-white-40)", marginBottom: "20px" }}>
@@ -141,7 +141,7 @@ export default function SavedPage() {
                         width: "38px", height: "38px", borderRadius: "10px",
                         background: "var(--color-surface-3)", border: "1px solid var(--color-border)",
                         display: "flex", alignItems: "center", justifyContent: "center",
-                        fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "16px", color: "var(--color-orange)",
+                        fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "16px", color: "var(--color-orange)",
                       }}>
                         {company.charAt(0).toUpperCase()}
                       </div>
@@ -152,7 +152,7 @@ export default function SavedPage() {
                     <div>
                       <Link
                         href={`/jobs/${j?.id}`}
-                        style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "15px", color: "var(--color-white)", textDecoration: "none", display: "block", lineHeight: 1.35, transition: "color 0.2s" }}
+                        style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "15px", color: "var(--color-white)", textDecoration: "none", display: "block", lineHeight: 1.35, transition: "color 0.2s" }}
                         onMouseEnter={(e) => (e.currentTarget.style.color = "var(--color-orange)")}
                         onMouseLeave={(e) => (e.currentTarget.style.color = "var(--color-white)")}
                       >
@@ -180,7 +180,7 @@ export default function SavedPage() {
                     <div style={{ display: "flex", gap: "8px", marginTop: "auto" }}>
                       <Link
                         href={`/jobs/${j?.id}`}
-                        style={{ flex: 1, textAlign: "center", padding: "9px", borderRadius: "8px", background: "transparent", border: "1px solid var(--color-border)", color: "var(--color-white-65)", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "12px", textDecoration: "none", transition: "all 0.2s" }}
+                        style={{ flex: 1, textAlign: "center", padding: "9px", borderRadius: "8px", background: "transparent", border: "1px solid var(--color-border)", color: "var(--color-white-65)", fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "12px", textDecoration: "none", transition: "all 0.2s" }}
                         onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--color-white-40)"; e.currentTarget.style.color = "var(--color-white)"; }}
                         onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--color-border)"; e.currentTarget.style.color = "var(--color-white-65)"; }}
                       >
@@ -191,7 +191,7 @@ export default function SavedPage() {
                           href={j.applyUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          style={{ flex: 1, textAlign: "center", padding: "9px", borderRadius: "8px", background: "var(--color-orange)", color: "#000", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "12px", textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: "5px", transition: "background 0.2s" }}
+                          style={{ flex: 1, textAlign: "center", padding: "9px", borderRadius: "8px", background: "var(--color-orange)", color: "#000", fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "12px", textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: "5px", transition: "background 0.2s" }}
                           onMouseEnter={(e) => ((e.currentTarget as HTMLAnchorElement).style.background = "var(--color-orange-hover)")}
                           onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.background = "var(--color-orange)")}
                         >

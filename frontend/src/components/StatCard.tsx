@@ -47,7 +47,7 @@ export default function StatCard({ title, value, icon, accent = "orange" }: Stat
       >
         <p
           style={{
-            fontFamily: "var(--font-display)",
+            fontFamily: "var(--font-body)",
             fontWeight: 700,
             fontSize: "10px",
             letterSpacing: "0.13em",

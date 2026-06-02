@@ -124,7 +124,7 @@ export default function Sidebar() {
             <Link
               href="/"
               style={{
-                fontFamily: "var(--font-display)",
+                fontFamily: "var(--font-body)",
                 fontWeight: 800,
                 fontSize: "19px",
                 color: "var(--color-white)",
@@ -194,7 +194,7 @@ export default function Sidebar() {
                   justifyContent: collapsed ? "center" : "flex-start",
                   borderRadius: "8px",
                   textDecoration: "none",
-                  fontFamily: "var(--font-display)",
+                  fontFamily: "var(--font-body)",
                   fontWeight: 600,
                   fontSize: "13px",
                   color: active ? "var(--color-orange)" : "var(--color-white-65)",
@@ -241,7 +241,7 @@ export default function Sidebar() {
               background: "transparent",
               border: "1px solid transparent",
               cursor: "pointer",
-              fontFamily: "var(--font-display)",
+              fontFamily: "var(--font-body)",
               fontWeight: 600,
               fontSize: "13px",
               color: "rgba(248,113,113,0.8)",
