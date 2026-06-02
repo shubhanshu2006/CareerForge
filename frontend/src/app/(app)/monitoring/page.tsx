@@ -7,31 +7,32 @@ import { unwrap } from "@/lib/api";
 import { FaHeartbeat, FaSync, FaCheckCircle, FaTimesCircle, FaExclamationTriangle } from "react-icons/fa";
 
 interface HealthData {
-  status?: string;
-  uptime?: number;
-  timestamp?: string;
+  latestRuns?: Array<{ source: string; startedAt: string; completedAt?: string; totalFetched: number; totalInserted: number }>;
+  last24Hours?: { runCount: number; totalFetched: number; totalInserted: number; totalSkipped: number; totalFailed: number };
 }
 
 interface RunData {
   runId?: string;
   id?: string;
   source?: string;
-  status?: string;
-  jobsFound?: number;
-  jobsNew?: number;
   startedAt?: string;
   completedAt?: string;
   durationMs?: number;
-  errorMessage?: string;
+  totalFetched?: number;
+  totalInserted?: number;
+  totalSkipped?: number;
+  totalFailed?: number;
+  alertsGenerated?: number;
+  emailsEnqueued?: number;
 }
 
 interface AggregateData {
-  totalRuns?: number;
-  successfulRuns?: number;
-  failedRuns?: number;
-  totalJobsFound?: number;
-  totalJobsNew?: number;
-  sources?: Array<{ source: string; runs: number; jobsFound: number }>;
+  runCount?: number;
+  totalFetched?: number;
+  totalInserted?: number;
+  totalSkipped?: number;
+  totalFailed?: number;
+  avgDurationMs?: number;
 }
 
 function formatDuration(ms?: number): string {
@@ -138,40 +139,40 @@ export default function MonitoringPage() {
             <>
               {/* Health status */}
               <SectionCard title="System Health">
-                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                  <StatusIcon status={health?.status ?? "unknown"} />
-                  <div>
-                    <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "16px", color: health?.status?.toLowerCase() === "ok" || health?.status?.toLowerCase() === "healthy" ? "#4ade80" : "#f87171", margin: 0 }}>
-                      {health?.status ?? "Unknown"}
-                    </p>
-                    {health?.uptime !== undefined && (
-                      <p style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--color-white-40)", margin: "3px 0 0" }}>
-                        Uptime: {Math.floor((health.uptime ?? 0) / 3600)}h {Math.floor(((health.uptime ?? 0) % 3600) / 60)}m
-                      </p>
-                    )}
-                    {health?.timestamp && (
-                      <p style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--color-white-40)", margin: "2px 0 0" }}>
-                        Last checked: {formatDate(health.timestamp)}
+                {health ? (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                      <FaCheckCircle style={{ color: "#4ade80", fontSize: "16px" }} />
+                      <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "15px", color: "#4ade80" }}>Healthy</span>
+                    </div>
+                    {health.last24Hours && (
+                      <p style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--color-white-40)", margin: 0 }}>
+                        Last 24h: {health.last24Hours.runCount} runs · {health.last24Hours.totalFetched.toLocaleString()} fetched · {health.last24Hours.totalInserted.toLocaleString()} new jobs
                       </p>
                     )}
                   </div>
-                </div>
+                ) : (
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <FaExclamationTriangle style={{ color: "#fbbf24", fontSize: "14px" }} />
+                    <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "15px", color: "#fbbf24" }}>Unknown</span>
+                  </div>
+                )}
               </SectionCard>
 
               {/* Aggregates */}
               {aggs && (
                 <SectionCard title="Summary">
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: "14px", marginBottom: "20px" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: "14px" }}>
                     {[
-                      { label: "Total Runs", value: aggs.totalRuns ?? 0, color: "#60a5fa" },
-                      { label: "Successful", value: aggs.successfulRuns ?? 0, color: "#4ade80" },
-                      { label: "Failed", value: aggs.failedRuns ?? 0, color: "#f87171" },
-                      { label: "Jobs Found", value: aggs.totalJobsFound ?? 0, color: "var(--color-orange)" },
-                      { label: "Jobs New", value: aggs.totalJobsNew ?? 0, color: "#c084fc" },
+                      { label: "Total Runs",  value: aggs.runCount ?? 0,        color: "#60a5fa" },
+                      { label: "Jobs Found",  value: aggs.totalFetched ?? 0,    color: "var(--color-orange)" },
+                      { label: "Jobs New",    value: aggs.totalInserted ?? 0,   color: "#4ade80" },
+                      { label: "Duplicates",  value: aggs.totalSkipped ?? 0,    color: "#c084fc" },
+                      { label: "Avg Duration",value: aggs.avgDurationMs ? `${(aggs.avgDurationMs / 1000).toFixed(1)}s` : "—", color: "#fbbf24", raw: true },
                     ].map((s) => (
                       <div key={s.label} style={{ background: "var(--color-surface-3)", border: "1px solid var(--color-border)", borderRadius: "12px", padding: "16px" }}>
-                        <p style={{ fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: "26px", color: s.color, margin: "0 0 4px" }}>
-                          {s.value.toLocaleString()}
+                        <p style={{ fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: "22px", color: s.color, margin: "0 0 4px" }}>
+                          {s.raw ? s.value : typeof s.value === "number" ? s.value.toLocaleString() : s.value}
                         </p>
                         <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-white-40)", margin: 0 }}>
                           {s.label}
@@ -179,34 +180,6 @@ export default function MonitoringPage() {
                       </div>
                     ))}
                   </div>
-
-                  {aggs.sources && aggs.sources.length > 0 && (
-                    <>
-                      <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-white-40)", marginBottom: "10px" }}>
-                        By Source
-                      </p>
-                      <div style={{ overflowX: "auto" }}>
-                        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                          <thead>
-                            <tr style={{ borderBottom: "1px solid var(--color-border)" }}>
-                              {["Source", "Runs", "Jobs Found"].map((h) => (
-                                <th key={h} style={{ padding: "8px 12px", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-white-40)", textAlign: "left" }}>{h}</th>
-                              ))}
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {aggs.sources.map((s) => (
-                              <tr key={s.source} style={{ borderBottom: "1px solid rgba(46,46,46,0.5)" }}>
-                                <td style={{ padding: "10px 12px", fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "13px", color: "var(--color-white)" }}>{s.source}</td>
-                                <td style={{ padding: "10px 12px", fontFamily: "var(--font-mono)", fontSize: "13px", color: "var(--color-white-65)" }}>{s.runs}</td>
-                                <td style={{ padding: "10px 12px", fontFamily: "var(--font-mono)", fontSize: "13px", color: "var(--color-orange)" }}>{s.jobsFound}</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </>
-                  )}
                 </SectionCard>
               )}
 
@@ -227,24 +200,26 @@ export default function MonitoringPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {runs.slice(0, 50).map((run, i) => (
+                        {runs.slice(0, 50).map((run, i) => {
+                          const status = run.completedAt
+                            ? (run.totalFailed ?? 0) > 0 ? "partial" : "success"
+                            : "running";
+                          const statusColor = status === "success" ? "#4ade80" : status === "partial" ? "#fbbf24" : "#60a5fa";
+                          return (
                           <tr key={run.runId ?? run.id ?? i} className="run-row">
                             <td style={{ padding: "12px 14px", fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "13px", color: "var(--color-white)", whiteSpace: "nowrap" }}>
                               {run.source ?? "—"}
                             </td>
                             <td style={{ padding: "12px 14px" }}>
-                              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                                <StatusIcon status={run.status} />
-                                <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "11px", color: run.status?.toLowerCase() === "success" ? "#4ade80" : run.status?.toLowerCase() === "failed" ? "#f87171" : "var(--color-white-40)" }}>
-                                  {run.status ?? "—"}
-                                </span>
-                              </div>
+                              <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "11px", color: statusColor, background: `${statusColor}18`, padding: "3px 8px", borderRadius: "999px", border: `1px solid ${statusColor}40` }}>
+                                {status.toUpperCase()}
+                              </span>
                             </td>
                             <td style={{ padding: "12px 14px", fontFamily: "var(--font-mono)", fontSize: "13px", color: "var(--color-white-65)" }}>
-                              {run.jobsFound ?? "—"}
+                              {run.totalFetched?.toLocaleString() ?? "—"}
                             </td>
-                            <td style={{ padding: "12px 14px", fontFamily: "var(--font-mono)", fontSize: "13px", color: run.jobsNew ? "var(--color-orange)" : "var(--color-white-40)" }}>
-                              {run.jobsNew ?? "—"}
+                            <td style={{ padding: "12px 14px", fontFamily: "var(--font-mono)", fontSize: "13px", color: (run.totalInserted ?? 0) > 0 ? "var(--color-orange)" : "var(--color-white-40)" }}>
+                              {run.totalInserted?.toLocaleString() ?? "—"}
                             </td>
                             <td style={{ padding: "12px 14px", fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--color-white-40)", whiteSpace: "nowrap" }}>
                               {formatDuration(run.durationMs)}
@@ -253,7 +228,8 @@ export default function MonitoringPage() {
                               {formatDate(run.startedAt)}
                             </td>
                           </tr>
-                        ))}
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
