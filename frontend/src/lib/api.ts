@@ -89,14 +89,26 @@ export function createApi(getToken: () => Promise<string | null>) {
         body: JSON.stringify({ status }),
       }),
 
-    createNote: (applicationId: number | string, content: string) =>
+    createNote: (
+      applicationId: number | string,
+      payload: { round?: string; notes?: string; feedback?: string; category?: string; overcome?: boolean }
+    ) =>
       req(`/api/v1/applications/${applicationId}/notes`, {
         method: "POST",
-        body: JSON.stringify({ content }),
+        body: JSON.stringify(payload),
       }),
 
     listNotes: (applicationId: number | string) =>
       req(`/api/v1/applications/${applicationId}/notes`, { method: "GET" }),
+
+    updateNoteOvercome: (noteId: number | string, overcome: boolean) =>
+      req(`/api/v1/applications/notes/${noteId}/overcome`, {
+        method: "PATCH",
+        body: JSON.stringify({ overcome }),
+      }),
+
+    listAllNotes: () =>
+      req("/api/v1/applications/notes", { method: "GET" }),
 
     // ── Dashboard ─────────────────────────────────────────────────────────────
     getDashboard: () =>

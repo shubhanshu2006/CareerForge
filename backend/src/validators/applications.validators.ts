@@ -28,18 +28,22 @@ export const updateStatusSchema = z.object({
 export const createNoteSchema = z
   .object({
     round: z.string().min(1).max(80).optional(),
-    notes: z.string().min(1).max(2000).optional(),
-    feedback: z.string().min(1).max(2000).optional(),
+    notes: z.string().min(1).max(5000).optional(),
+    feedback: z.string().min(1).max(5000).optional(),
+    category: z.string().min(1).max(60).optional(),
+    overcome: z.boolean().optional(),
   })
   .refine(
     (data) =>
       data.round !== undefined ||
       data.notes !== undefined ||
       data.feedback !== undefined,
-    {
-      message: "At least one field is required",
-    },
+    { message: "At least one of round, notes, or feedback is required" },
   );
+
+export const updateNoteOvercomeSchema = z.object({
+  overcome: z.boolean(),
+});
 
 export const paginationSchema = z.object({
   page: z.preprocess(toNumber, z.number().int().min(1).optional()),

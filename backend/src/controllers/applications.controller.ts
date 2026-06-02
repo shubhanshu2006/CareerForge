@@ -7,14 +7,17 @@ import {
   createApplicationSchema,
   createNoteSchema,
   paginationSchema,
+  updateNoteOvercomeSchema,
   updateStatusSchema,
 } from "../validators/applications.validators.js";
 import {
   addNote,
+  getAllUserNotes,
   getApplication,
   getApplications,
   getNotes,
   saveJob,
+  toggleNoteOvercome,
   updateStatus,
 } from "../services/applications.service.js";
 
@@ -133,5 +136,38 @@ export const listApplicationNotes = asyncHandler(
     });
 
     return res.status(200).json(new ApiResponse(200, result, "Notes fetched"));
+  },
+);
+
+export const updateNoteOvercomeController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const noteId = Number(req.params.noteId);
+    if (!Number.isInteger(noteId)) {
+      throw new ApiError(400, "Invalid note id");
+    }
+
+    const parsed = updateNoteOvercomeSchema.safeParse(req.body);
+    if (!parsed.success) {
+      throw new ApiError(400, "Invalid payload", parsed.error.issues);
+    }
+
+    const result = await toggleNoteOvercome({
+      userId: getUserId(req),
+      noteId,
+      overcome: parsed.data.overcome,
+    });
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, result, "Note updated"));
+  },
+);
+
+export const listAllUserNotesController = asyncHandler(
+  async (_req: Request, res: Response) => {
+    const result = await getAllUserNotes(getUserId(_req));
+    return res
+      .status(200)
+      .json(new ApiResponse(200, result, "All notes fetched"));
   },
 );

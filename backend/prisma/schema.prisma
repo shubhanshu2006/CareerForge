@@ -394,10 +394,17 @@ model ApplicationNote {
   notes    String?
   feedback String?
 
+  category String?
+  overcome Boolean @default(false)
+
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   application Application @relation(fields: [applicationId], references: [id])
 
+  @@index([applicationId])
+  @@index([category])
+  @@index([overcome])
   @@map("application_notes")
 }
 

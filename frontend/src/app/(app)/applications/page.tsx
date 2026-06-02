@@ -7,13 +7,39 @@ import { toast } from "react-hot-toast";
 import AppHeader from "@/components/AppHeader";
 import StatusBadge, { getStatusStyle } from "@/components/StatusBadge";
 import { createApi, extractItems, unwrap } from "@/lib/api";
-import { FaChevronDown, FaPlus, FaStickyNote, FaTimes } from "react-icons/fa";
+import {
+  FaChevronDown,
+  FaPlus,
+  FaStickyNote,
+  FaTimes,
+  FaCheckCircle,
+  FaCircle,
+  FaRedo,
+} from "react-icons/fa";
 
 const STATUS_OPTIONS = [
   "SAVED", "APPLIED", "PHONE_SCREEN", "INTERVIEW", "OFFER", "REJECTED", "WITHDRAWN",
 ];
 
-interface ApplicationNote { id: number; content: string; createdAt: string; }
+const CATEGORY_OPTIONS = [
+  "DSA",
+  "System Design",
+  "Coding",
+  "Communication",
+  "Behavioral",
+  "Aptitude",
+  "Other",
+];
+
+interface ApplicationNote {
+  id: number;
+  round?: string | null;
+  notes?: string | null;
+  feedback?: string | null;
+  category?: string | null;
+  overcome: boolean;
+  createdAt: string;
+}
 interface Application {
   id: number;
   status: string;
@@ -42,6 +68,8 @@ export default function ApplicationsPage() {
   const [notes, setNotes] = useState<Record<number, ApplicationNote[]>>({});
   const [noteLoading, setNoteLoading] = useState<Record<number, boolean>>({});
   const [newNote, setNewNote] = useState<Record<number, string>>({});
+  const [newNoteRound, setNewNoteRound] = useState<Record<number, string>>({});
+  const [newNoteCategory, setNewNoteCategory] = useState<Record<number, string>>({});
   const [statusFilter, setStatusFilter] = useState("ALL");
 
   useEffect(() => {
@@ -98,14 +126,37 @@ export default function ApplicationsPage() {
   const handleAddNote = async (appId: number) => {
     const content = newNote[appId]?.trim();
     if (!content) return;
+    const round = newNoteRound[appId]?.trim() || undefined;
+    const category = newNoteCategory[appId]?.trim() || undefined;
     const api = createApi(() => getToken());
     try {
-      const note = await unwrap<ApplicationNote>(await api.createNote(appId, content));
-      setNotes((p) => ({ ...p, [appId]: [...(p[appId] ?? []), note] }));
+      const list = await unwrap<ApplicationNote[]>(
+        await api.createNote(appId, { notes: content, round, category })
+      );
+      setNotes((p) => ({ ...p, [appId]: Array.isArray(list) ? list : [] }));
       setNewNote((p) => ({ ...p, [appId]: "" }));
+      setNewNoteRound((p) => ({ ...p, [appId]: "" }));
+      setNewNoteCategory((p) => ({ ...p, [appId]: "" }));
       toast.success("Note added");
-    } catch {
-      toast.error("Failed to add note");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to add note");
+    }
+  };
+
+  const handleToggleOvercome = async (appId: number, noteId: number, current: boolean) => {
+    const api = createApi(() => getToken());
+    try {
+      await unwrap(
+        await api.updateNoteOvercome(noteId, !current)
+      );
+      setNotes((p) => ({
+        ...p,
+        [appId]: (p[appId] ?? []).map((n) =>
+          n.id === noteId ? { ...n, overcome: !current } : n
+        ),
+      }));
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to update");
     }
   };
 
@@ -303,14 +354,57 @@ export default function ApplicationsPage() {
                           <>
                             {appNotes.length === 0 && (
                               <p style={{ fontFamily: "var(--font-body)", fontSize: "13px", color: "var(--color-white-40)", marginBottom: "12px" }}>
-                                No notes yet. Add your first one below.
+                                No notes yet. Capture what went wrong — track and overcome your weaknesses.
                               </p>
                             )}
                             <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "12px" }}>
                               {appNotes.map((n) => (
-                                <div key={n.id} style={{ padding: "10px 14px", background: "var(--color-surface-3)", border: "1px solid var(--color-border)", borderRadius: "10px" }}>
-                                  <p style={{ fontFamily: "var(--font-body)", fontSize: "13px", color: "var(--color-white-65)", margin: "0 0 4px", lineHeight: 1.5 }}>
-                                    {n.content}
+                                <div
+                                  key={n.id}
+                                  style={{
+                                    padding: "12px 14px",
+                                    background: "var(--color-surface-3)",
+                                    border: n.overcome ? "1px solid rgba(74,222,128,0.25)" : "1px solid var(--color-border)",
+                                    borderRadius: "10px",
+                                    opacity: n.overcome ? 0.7 : 1,
+                                  }}
+                                >
+                                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px", marginBottom: "6px" }}>
+                                    <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                                      {n.round && (
+                                        <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "10px", letterSpacing: "0.04em", padding: "2px 8px", borderRadius: "4px", background: "var(--color-orange-dim)", color: "var(--color-orange)", border: "1px solid var(--color-orange-border)" }}>
+                                          {n.round}
+                                        </span>
+                                      )}
+                                      {n.category && (
+                                        <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", padding: "2px 8px", borderRadius: "4px", background: "var(--color-surface-2)", color: "var(--color-white-65)", border: "1px solid var(--color-border)" }}>
+                                          {n.category}
+                                        </span>
+                                      )}
+                                      {n.overcome && (
+                                        <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "10px", letterSpacing: "0.04em", padding: "2px 8px", borderRadius: "4px", background: "rgba(74,222,128,0.12)", color: "rgb(74,222,128)", border: "1px solid rgba(74,222,128,0.3)" }}>
+                                          OVERCOME
+                                        </span>
+                                      )}
+                                    </div>
+                                    <button
+                                      onClick={() => handleToggleOvercome(app.id, n.id, n.overcome)}
+                                      title={n.overcome ? "Mark as still a weakness" : "Mark as overcome"}
+                                      style={{
+                                        background: "transparent",
+                                        border: "none",
+                                        cursor: "pointer",
+                                        color: n.overcome ? "rgb(74,222,128)" : "var(--color-white-40)",
+                                        fontSize: "14px",
+                                        padding: "2px 4px",
+                                        flexShrink: 0,
+                                      }}
+                                    >
+                                      {n.overcome ? <FaCheckCircle /> : <FaCircle />}
+                                    </button>
+                                  </div>
+                                  <p style={{ fontFamily: "var(--font-body)", fontSize: "13px", color: "var(--color-white-65)", margin: "0 0 6px", lineHeight: 1.5, textDecoration: n.overcome ? "line-through" : "none" }}>
+                                    {n.notes ?? n.feedback ?? ""}
                                   </p>
                                   <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--color-white-40)" }}>
                                     {formatDate(n.createdAt)}
@@ -318,37 +412,60 @@ export default function ApplicationsPage() {
                                 </div>
                               ))}
                             </div>
-                            <div style={{ display: "flex", gap: "8px" }}>
-                              <textarea
-                                className="note-input"
-                                rows={2}
-                                placeholder="Add a note…"
-                                value={newNote[app.id] ?? ""}
-                                onChange={(e) => setNewNote((p) => ({ ...p, [app.id]: e.target.value }))}
-                                onKeyDown={(e) => {
-                                  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleAddNote(app.id); }
-                                }}
-                              />
-                              <button
-                                onClick={() => handleAddNote(app.id)}
-                                style={{
-                                  flexShrink: 0,
-                                  padding: "0 16px",
-                                  background: "var(--color-orange-dim)",
-                                  border: "1px solid var(--color-orange-border)",
-                                  borderRadius: "8px",
-                                  color: "var(--color-orange)",
-                                  cursor: "pointer",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: "6px",
-                                  fontFamily: "var(--font-display)",
-                                  fontWeight: 700,
-                                  fontSize: "12px",
-                                }}
-                              >
-                                <FaPlus style={{ fontSize: "10px" }} /> Add
-                              </button>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                              <div style={{ display: "flex", gap: "8px" }}>
+                                <input
+                                  className="note-input"
+                                  type="text"
+                                  placeholder="Round (e.g. Phone Screen, Onsite R1)"
+                                  value={newNoteRound[app.id] ?? ""}
+                                  onChange={(e) => setNewNoteRound((p) => ({ ...p, [app.id]: e.target.value }))}
+                                  style={{ flex: 1 }}
+                                />
+                                <select
+                                  className="note-input"
+                                  value={newNoteCategory[app.id] ?? ""}
+                                  onChange={(e) => setNewNoteCategory((p) => ({ ...p, [app.id]: e.target.value }))}
+                                  style={{ flex: 1, cursor: "pointer" }}
+                                >
+                                  <option value="">Category (optional)</option>
+                                  {CATEGORY_OPTIONS.map((c) => (
+                                    <option key={c} value={c}>{c}</option>
+                                  ))}
+                                </select>
+                              </div>
+                              <div style={{ display: "flex", gap: "8px" }}>
+                                <textarea
+                                  className="note-input"
+                                  rows={2}
+                                  placeholder="What went wrong? What was the weakness?"
+                                  value={newNote[app.id] ?? ""}
+                                  onChange={(e) => setNewNote((p) => ({ ...p, [app.id]: e.target.value }))}
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleAddNote(app.id); }
+                                  }}
+                                />
+                                <button
+                                  onClick={() => handleAddNote(app.id)}
+                                  style={{
+                                    flexShrink: 0,
+                                    padding: "0 16px",
+                                    background: "var(--color-orange-dim)",
+                                    border: "1px solid var(--color-orange-border)",
+                                    borderRadius: "8px",
+                                    color: "var(--color-orange)",
+                                    cursor: "pointer",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "6px",
+                                    fontFamily: "var(--font-display)",
+                                    fontWeight: 700,
+                                    fontSize: "12px",
+                                  }}
+                                >
+                                  <FaPlus style={{ fontSize: "10px" }} /> Add
+                                </button>
+                              </div>
                             </div>
                           </>
                         )}

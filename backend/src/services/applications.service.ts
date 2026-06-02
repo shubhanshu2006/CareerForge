@@ -5,9 +5,13 @@ import {
   createApplicationNote,
   findApplicationById,
   findJobById,
+  findNoteById,
+  getWeaknessStats,
+  listAllNotesForUser,
   listApplicationNotes,
   listApplications,
   updateApplicationStatus,
+  updateNoteOvercome,
   upsertSavedApplication,
 } from "../repositories/applications.repository.js";
 
@@ -92,6 +96,8 @@ export const addNote = async (input: {
   round?: string;
   notes?: string;
   feedback?: string;
+  category?: string;
+  overcome?: boolean;
 }) => {
   const application = await findApplicationById(
     input.userId,
@@ -106,6 +112,8 @@ export const addNote = async (input: {
     round: input.round,
     notes: input.notes,
     feedback: input.feedback,
+    category: input.category,
+    overcome: input.overcome,
   });
 
   return listApplicationNotes(input.applicationId);
@@ -125,4 +133,27 @@ export const getNotes = async (input: {
   }
 
   return listApplicationNotes(input.applicationId);
+};
+
+export const toggleNoteOvercome = async (input: {
+  userId: number;
+  noteId: number;
+  overcome: boolean;
+}) => {
+  const note = await findNoteById(input.noteId);
+  if (!note) {
+    throw new ApiError(404, "Note not found");
+  }
+  if (note.application.userId !== input.userId) {
+    throw new ApiError(403, "Forbidden");
+  }
+  return updateNoteOvercome(input.noteId, input.overcome);
+};
+
+export const getAllUserNotes = async (userId: number) => {
+  const [notes, stats] = await Promise.all([
+    listAllNotesForUser(userId),
+    getWeaknessStats(userId),
+  ]);
+  return { notes, stats };
 };

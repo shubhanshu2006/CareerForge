@@ -18,17 +18,19 @@ import {
   FaSlidersH,
   FaHeartbeat,
   FaHeart,
+  FaShieldAlt,
 } from "react-icons/fa";
 
 const NAV_ITEMS: { label: string; path: Route; icon: React.ReactNode }[] = [
-  { label: "Dashboard",   path: "/dashboard",    icon: <FaTh /> },
-  { label: "Browse Jobs", path: "/jobs",          icon: <FaSearch /> },
-  { label: "For You",     path: "/for-you",       icon: <FaHeart /> },
-  { label: "Applications",path: "/applications",  icon: <FaPaperPlane /> },
-  { label: "Saved Jobs",  path: "/saved",         icon: <FaBookmark /> },
-  { label: "Preferences", path: "/preferences",   icon: <FaSlidersH /> },
-  { label: "Profile",     path: "/profile",        icon: <FaUser /> },
-  { label: "Monitoring",  path: "/monitoring",    icon: <FaHeartbeat /> },
+  { label: "Dashboard",   path: "/dashboard" as Route,    icon: <FaTh /> },
+  { label: "Browse Jobs", path: "/jobs" as Route,          icon: <FaSearch /> },
+  { label: "For You",     path: "/for-you" as Route,       icon: <FaHeart /> },
+  { label: "Applications",path: "/applications" as Route,  icon: <FaPaperPlane /> },
+  { label: "Growth Tracker", path: "/weaknesses" as Route, icon: <FaShieldAlt /> },
+  { label: "Saved Jobs",  path: "/saved" as Route,         icon: <FaBookmark /> },
+  { label: "Preferences", path: "/preferences" as Route,   icon: <FaSlidersH /> },
+  { label: "Profile",     path: "/profile" as Route,        icon: <FaUser /> },
+  { label: "Monitoring",  path: "/monitoring" as Route,    icon: <FaHeartbeat /> },
 ];
 
 export default function Sidebar() {

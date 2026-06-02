@@ -59,6 +59,8 @@ export const createApplicationNote = (
     round?: string;
     notes?: string;
     feedback?: string;
+    category?: string;
+    overcome?: boolean;
   },
 ) =>
   prisma.applicationNote.create({
@@ -67,6 +69,8 @@ export const createApplicationNote = (
       round: data.round ?? null,
       notes: data.notes ?? null,
       feedback: data.feedback ?? null,
+      category: data.category ?? null,
+      overcome: data.overcome ?? false,
     },
   });
 
@@ -75,3 +79,43 @@ export const listApplicationNotes = (applicationId: number) =>
     where: { applicationId },
     orderBy: [{ createdAt: "desc" }],
   });
+
+export const findNoteById = (noteId: number) =>
+  prisma.applicationNote.findUnique({
+    where: { id: noteId },
+    include: {
+      application: { include: { job: true } },
+    },
+  });
+
+export const updateNoteOvercome = (noteId: number, overcome: boolean) =>
+  prisma.applicationNote.update({
+    where: { id: noteId },
+    data: { overcome },
+  });
+
+export const listAllNotesForUser = (userId: number) =>
+  prisma.applicationNote.findMany({
+    where: { application: { userId } },
+    include: {
+      application: {
+        include: { job: { select: { id: true, title: true, company: true } } },
+      },
+    },
+    orderBy: [{ createdAt: "desc" }],
+  });
+
+export const getWeaknessStats = async (userId: number) => {
+  const [total, open, overcome] = await Promise.all([
+    prisma.applicationNote.count({
+      where: { application: { userId } },
+    }),
+    prisma.applicationNote.count({
+      where: { application: { userId }, overcome: false },
+    }),
+    prisma.applicationNote.count({
+      where: { application: { userId }, overcome: true },
+    }),
+  ]);
+  return { total, open, overcome };
+};
