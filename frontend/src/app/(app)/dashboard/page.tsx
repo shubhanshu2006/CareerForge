@@ -111,10 +111,10 @@ export default function DashboardPage() {
             className="dash-grid-4"
             style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px", marginBottom: "32px" }}
           >
-            <StatCard title="Total Applied"         value={totalApplied}             icon={<FaPaperPlane />} />
-            <StatCard title="Interviews"            value={breakdown.INTERVIEW ?? 0}  icon={<FaCalendarAlt />} />
-            <StatCard title="Offers Received"       value={breakdown.OFFER ?? 0}      icon={<FaTrophy />} accent="green" />
-            <StatCard title="Saved / Phone Screen"  value={breakdown.PHONE_SCREEN ?? 0} icon={<FaBookmark />} accent="blue" />
+            <StatCard title="Total Applied"         value={totalApplied}                                          icon={<FaPaperPlane />} />
+            <StatCard title="Interviews"            value={(breakdown.INTERVIEW ?? 0) + (breakdown.FINAL_ROUND ?? 0)} icon={<FaCalendarAlt />} />
+            <StatCard title="Offers Received"       value={breakdown.OFFER ?? 0}                                  icon={<FaTrophy />} accent="green" />
+            <StatCard title="Rejected"              value={breakdown.REJECTED ?? 0}                               icon={<FaBookmark />} accent="blue" />
           </div>
 
           {/* Bottom row */}

@@ -90,16 +90,21 @@ export default function JobsPage() {
     }
   }, [isLoaded, sort, query, company, location, experience, employmentType, workType, salaryMin, salaryMax, remote]);
 
-  // Fetch job type counts once on mount — no auth needed, public endpoint
+  // Fetch job type counts — refresh every 5 minutes
   useEffect(() => {
     const base = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
-    fetch(`${base}/api/v1/jobs/counts`)
-      .then((r) => r.json())
-      .then((json) => {
-        const data = json?.data ?? json;
-        if (data && typeof data.all === "number") setCounts(data);
-      })
-      .catch(() => {/* non-critical */});
+    const load = () =>
+      fetch(`${base}/api/v1/jobs/counts`)
+        .then((r) => r.json())
+        .then((json) => {
+          const data = json?.data ?? json;
+          if (data && typeof data.all === "number") setCounts(data);
+        })
+        .catch(() => {});
+
+    load();
+    const interval = setInterval(load, 5 * 60 * 1000);
+    return () => clearInterval(interval);
   }, []);
 
   // Initial load

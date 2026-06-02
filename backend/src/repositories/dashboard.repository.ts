@@ -16,3 +16,19 @@ export const getApplicationStatusCounts = async (userId: number) => {
     {} as Record<ApplicationStatus, number>,
   );
 };
+
+export const getRecentApplications = (userId: number, limit = 10) =>
+  prisma.application.findMany({
+    where: { userId },
+    orderBy: { updatedAt: "desc" },
+    take: limit,
+    select: {
+      id: true,
+      status: true,
+      createdAt: true,
+      updatedAt: true,
+      job: {
+        select: { id: true, title: true, company: true },
+      },
+    },
+  });
