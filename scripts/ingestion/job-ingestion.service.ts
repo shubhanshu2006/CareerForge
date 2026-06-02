@@ -45,6 +45,21 @@ import { companySites } from "../scrapers/company-sites/companies.js";
 import { scrapeCompanySites } from "../scrapers/company-sites/company.scraper.js";
 import { normalizeCompanySiteJobs } from "../normalizers/company-site.normalizer.js";
 
+// ─── SmartRecruiters ──────────────────────────────────────────────────────────
+import { smartRecruitersCompanies } from "../scrapers/smartrecruiters/companies.js";
+import { scrapeSmartRecruiters } from "../scrapers/smartrecruiters/smartrecruiters.scraper.js";
+import { normalizeSmartRecruitersJobs } from "../normalizers/smartrecruiters.normalizer.js";
+
+// ─── Adzuna ───────────────────────────────────────────────────────────────────
+import { adzunaSearches } from "../scrapers/adzuna/companies.js";
+import { scrapeAdzuna } from "../scrapers/adzuna/adzuna.scraper.js";
+import { normalizeAdzunaJobs } from "../normalizers/adzuna.normalizer.js";
+
+// ─── SkillCareerHub ───────────────────────────────────────────────────────────
+import { skillcareerhubSources } from "../scrapers/skillcareerhub/companies.js";
+import { scrapeSkillCareerHub } from "../scrapers/skillcareerhub/skillcareerhub.scraper.js";
+import { normalizeSkillCareerHubJobs } from "../normalizers/skillcareerhub.normalizer.js";
+
 // ─── Deduplication ────────────────────────────────────────────────────────────
 import { deduplicateJobs } from "../deduplication/deduplication.service.js";
 
@@ -247,6 +262,64 @@ export const runCompanySitesPipeline = async (): Promise<PipelineResult> => {
   return result;
 };
 
+export const runAdzunaPipeline = async (): Promise<PipelineResult> => {
+  const metrics = new PipelineMetrics("ADZUNA");
+  console.log("[Adzuna] Starting scrape...");
+
+  const results = await scrapeAdzuna(adzunaSearches);
+  const normalized: NormalizedJob[] = [];
+
+  for (const { company, jobs } of results) {
+    const n = normalizeAdzunaJobs(jobs);
+    console.log(`[Adzuna] ${company}: ${jobs.length} raw → ${n.length} normalized`);
+    metrics.recordFetched(company, n.length);
+    normalized.push(...n);
+  }
+
+  const result = await dedupeAndIngest("Adzuna", normalized, metrics);
+  await metrics.flush();
+  return result;
+};
+
+export const runSmartRecruitersPipeline = async (): Promise<PipelineResult> => {
+  const metrics = new PipelineMetrics("OTHER");
+  console.log("[SmartRecruiters] Starting scrape...");
+
+  const results = await scrapeSmartRecruiters(smartRecruitersCompanies);
+  const normalized: NormalizedJob[] = [];
+
+  for (const { company, jobs } of results) {
+    const n = normalizeSmartRecruitersJobs(jobs);
+    console.log(`[SmartRecruiters] ${company}: ${jobs.length} raw → ${n.length} normalized`);
+    metrics.recordFetched(company, n.length);
+    normalized.push(...n);
+  }
+
+  const result = await dedupeAndIngest("SmartRecruiters", normalized, metrics);
+  await metrics.flush();
+  return result;
+};
+
+export const runSkillCareerHubPipeline = async (): Promise<PipelineResult> => {  const metrics = new PipelineMetrics("SKILLCAREERHUB");
+  console.log("[SkillCareerHub] Starting scrape...");
+
+  const results = await scrapeSkillCareerHub(skillcareerhubSources);
+  const normalized: NormalizedJob[] = [];
+
+  for (const { company, jobs } of results) {
+    const n = normalizeSkillCareerHubJobs(jobs);
+    console.log(
+      `[SkillCareerHub] ${company}: ${jobs.length} raw → ${n.length} normalized`,
+    );
+    metrics.recordFetched(company, n.length);
+    normalized.push(...n);
+  }
+
+  const result = await dedupeAndIngest("SkillCareerHub", normalized, metrics);
+  await metrics.flush();
+  return result;
+};
+
 // ─── Unified Runner ───────────────────────────────────────────────────────────
 
 /**
@@ -257,16 +330,19 @@ export const runAllPipelines = async (): Promise<PipelineResult> => {
   const metrics = new PipelineMetrics("ALL");
 
   // API-based scrapers run concurrently
-  const [gh, lv, ab] = await Promise.allSettled([
+  const [gh, lv, ab, az, sch] = await Promise.allSettled([
     runGreenhousePipeline(),
     runLeverPipeline(),
     runAshbyPipeline(),
+    runAdzunaPipeline(),
+    runSkillCareerHubPipeline(),
   ]);
 
   // Workday and CompanySites run after (they're heavier)
-  const [wd, cs] = await Promise.allSettled([
+  const [wd, cs, sr] = await Promise.allSettled([
     runWorkdayPipeline(),
     runCompanySitesPipeline(),
+    runSmartRecruitersPipeline(),
   ]);
 
   const aggregate: PipelineResult = {
@@ -311,6 +387,18 @@ export const runAllPipelines = async (): Promise<PipelineResult> => {
     metrics.recordError("Ashby", String(ab.reason));
   }
 
+  if (az.status === "fulfilled") merge("Adzuna", az.value);
+  else {
+    console.error("[Adzuna] Pipeline failed:", az.reason);
+    metrics.recordError("Adzuna", String(az.reason));
+  }
+
+  if (sch.status === "fulfilled") merge("SkillCareerHub", sch.value);
+  else {
+    console.error("[SkillCareerHub] Pipeline failed:", sch.reason);
+    metrics.recordError("SkillCareerHub", String(sch.reason));
+  }
+
   if (wd.status === "fulfilled") merge("Workday", wd.value);
   else {
     console.error("[Workday] Pipeline failed:", wd.reason);
@@ -321,6 +409,12 @@ export const runAllPipelines = async (): Promise<PipelineResult> => {
   else {
     console.error("[CompanySites] Pipeline failed:", cs.reason);
     metrics.recordError("CompanySites", String(cs.reason));
+  }
+
+  if (sr.status === "fulfilled") merge("SmartRecruiters", sr.value);
+  else {
+    console.error("[SmartRecruiters] Pipeline failed:", sr.reason);
+    metrics.recordError("SmartRecruiters", String(sr.reason));
   }
 
   await metrics.flush();

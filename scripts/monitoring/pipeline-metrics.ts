@@ -38,6 +38,8 @@ export type PipelineSource =
   | "GREENHOUSE"
   | "LEVER"
   | "ASHBY"
+  | "ADZUNA"
+  | "SKILLCAREERHUB"
   | "WORKDAY"
   | "COMPANY_WEBSITE"
   | "ALL";

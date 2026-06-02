@@ -41,4 +41,22 @@ export const leverCompanies: string[] = [
   // Analytics / Data
   "amplitude",
   "dbt",
+
+  // India-focused companies
+  "razorpay",
+  "freshworks",
+  "phonepe",
+  "chargebee",
+  "browserstack",
+  "postman",
+  "clevertap",
+  "moengage",
+  "hasura",
+  "testbook",
+  "taskus",
+  "dream11",
+  "games24x7",
+  "vedantu",
+  "unacademy",
+  "slice",
 ];

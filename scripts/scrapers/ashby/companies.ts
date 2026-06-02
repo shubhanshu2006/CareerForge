@@ -12,6 +12,14 @@ export const ashbyCompanies: string[] = [
   "cursor",
   "linear",
   "retool",
+  "notion",
+  "loom",
+  "vercel",
+  "elevenlabs",
+  "cohere",
+  "warp",
+  "glean",
+  "scaleai",
 
   // Data / CRM
   "clay",
