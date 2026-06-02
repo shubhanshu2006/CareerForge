@@ -197,10 +197,14 @@ export default function LandingPage() {
           .flow-grid { grid-template-columns: repeat(3, 1fr) !important; }
           .timeline-grid { grid-template-columns: repeat(2, 1fr) !important; }
           .section { padding: 120px 24px !important; }
+          .hero-stat-card { display: none !important; }
+          .hero-grid { padding: 0 24px !important; gap: 32px !important; }
         }
         @media (max-width: 600px) {
           .usp-grid { grid-template-columns: 1fr !important; }
           .flow-grid { grid-template-columns: repeat(2, 1fr) !important; }
+          .section { padding: 80px 20px !important; }
+          .hero-grid h1 { font-size: 40px !important; }
         }
       `}</style>
 
@@ -281,6 +285,7 @@ export default function LandingPage() {
 
         {/* Hero content sits on top */}
         <div
+          className="hero-grid"
           style={{
             position: "relative",
             zIndex: 2,

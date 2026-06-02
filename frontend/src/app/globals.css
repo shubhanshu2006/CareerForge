@@ -361,12 +361,20 @@ textarea {
   align-items: center;
   justify-content: center;
   overflow-y: auto;
+  width: 100%;
+  min-width: 0;
 }
 
 @media (max-width: 768px) {
   .auth-split { grid-template-columns: 1fr; min-height: unset; }
   .auth-left  { display: none; }
-  .auth-right { padding: 32px 24px; }
+  .auth-right { padding: 32px 20px; align-items: stretch; width: 100%; }
+  .auth-shell { padding: 16px; }
+}
+
+@media (max-width: 480px) {
+  .auth-right { padding: 24px 16px; }
+  .auth-split { border-radius: 16px; max-width: 400px; margin: 0 auto; }
 }
 
 /* Clerk component overrides */
