@@ -11,6 +11,29 @@ export const metadata: Metadata = {
 export default function LoginPage() {
   return (
     <div className="auth-shell">
+      <div style={{ position: "absolute", top: "24px", left: "24px" }}>
+        <Link
+          href="/"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "6px",
+            fontFamily: "var(--font-body)",
+            fontSize: "14px",
+            fontWeight: 600,
+            color: "var(--color-white-65)",
+            textDecoration: "none",
+            padding: "8px 14px",
+            borderRadius: "8px",
+            border: "1px solid var(--color-border)",
+            background: "var(--color-surface-1)",
+            transition: "all 0.2s",
+          }}
+        >
+          <span style={{ fontSize: "16px", lineHeight: 1 }}>←</span>
+          Back to home
+        </Link>
+      </div>
 
       <div className="auth-split">
         {/* Left panel */}
@@ -112,13 +135,15 @@ export default function LoginPage() {
                   boxShadow: "none",
                   padding: 0,
                 },
-                // Hide email/password form and divider — Google only
-                dividerRow: { display: "none" },
-                formField__emailAddress: { display: "none" },
-                formField__password: { display: "none" },
-                formButtonPrimary: { display: "none" },
                 // Hide Clerk branding footer
                 footer: { display: "none" },
+                formButtonPrimary: {
+                  background: "var(--color-orange)",
+                  color: "#ffffff",
+                  fontWeight: 700,
+                  fontSize: "14px",
+                  "&:hover": { background: "#ea580c" },
+                },
               },
             }}
             redirectUrl="/dashboard"

@@ -14,36 +14,9 @@ const STEPS = [
   "Set your preferences.",
   "Receive instant job alerts.",
   "Track your applications.",
-  "Improve continuously with AI.",
+  "Improve continuously.",
 ];
 
-const AI_FEATURES = [
-  {
-    title: "AI Job Search",
-    sub: "Natural language queries across all jobs",
-    status: "Live",
-  },
-  {
-    title: "Interview Analysis",
-    sub: "Understand why interviews didn't progress",
-    status: "Live",
-  },
-  {
-    title: "Skill Gap Detection",
-    sub: "Know exactly what's missing for your target role",
-    status: "Live",
-  },
-  {
-    title: "Personalized Preparation Plans",
-    sub: "Week-by-week roadmaps to land your next role",
-    status: "Live",
-  },
-  {
-    title: "Career Intelligence",
-    sub: "Market trends and application benchmarks",
-    status: "Soon",
-  },
-];
 
 const USP_CARDS = [
   {
@@ -60,11 +33,6 @@ const USP_CARDS = [
     icon: "📊",
     title: "Unified Tracker",
     desc: "Manage every application, note, and status change in one place.",
-  },
-  {
-    icon: "🤖",
-    title: "AI-Powered Search",
-    desc: "Ask in plain English. Get precise, relevant results every time.",
   },
 ];
 
@@ -86,7 +54,6 @@ const MARQUEE_ITEMS = [
   "Scale AI",
 ];
 
-
 export default function LandingPage() {
   return (
     <div style={{ minHeight: "100vh" }}>
@@ -100,7 +67,7 @@ export default function LandingPage() {
         }
         .usp-grid {
           display: grid;
-          grid-template-columns: repeat(4, 1fr);
+          grid-template-columns: repeat(3, 1fr);
           gap: 16px;
         }
         .ai-grid {
@@ -271,18 +238,26 @@ export default function LandingPage() {
             Career<span style={{ color: "var(--color-orange)" }}>Forge</span>
           </Link>
           <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-            <Link className="btn-ghost" href={"/login" as Route} style={{
-                  fontFamily: "var(--font-body)",
-                  fontSize: "14px",
-                  fontWeight: 900,
-                }}>
+            <Link
+              className="btn-ghost"
+              href={"/login" as Route}
+              style={{
+                fontFamily: "var(--font-body)",
+                fontSize: "14px",
+                fontWeight: 900,
+              }}
+            >
               Log in
             </Link>
-            <Link className="btn-primary" href={"/register" as Route} style={{
-                  fontFamily: "var(--font-body)",
-                  fontSize: "14px",
-                  fontWeight: 900,
-                }}>
+            <Link
+              className="btn-primary"
+              href={"/register" as Route}
+              style={{
+                fontFamily: "var(--font-body)",
+                fontSize: "14px",
+                fontWeight: 900,
+              }}
+            >
               Start free
             </Link>
           </div>
@@ -325,7 +300,7 @@ export default function LandingPage() {
               style={{
                 fontFamily: "var(--font-body)",
                 fontWeight: 900,
-                fontSize: "clamp(60px, 9.5vw, 60px)",
+                fontSize: "60px",
                 lineHeight: 1.03,
                 letterSpacing: "-0.035em",
                 marginBottom: "20px",
@@ -352,7 +327,7 @@ export default function LandingPage() {
               <Link
                 className="btn-primary"
                 href={"/register" as Route}
-                 style={{
+                style={{
                   fontFamily: "var(--font-body)",
                   fontSize: "16px",
                   fontWeight: 900,
@@ -497,7 +472,7 @@ export default function LandingPage() {
             style={{
               fontFamily: "var(--font-body)",
               fontWeight: 900,
-              fontSize: "clamp(28px, 4vw, 44px)",
+              fontSize: "60px",
               letterSpacing: "-0.025em",
               marginBottom: "12px",
               color: "var(--color-white)",
@@ -509,7 +484,7 @@ export default function LandingPage() {
           <p
             style={{
               color: "var(--color-white-65)",
-              fontSize: "16px",
+              fontSize: "20px",
               maxWidth: "600px",
               lineHeight: 1.7,
               marginBottom: "36px",
@@ -520,7 +495,7 @@ export default function LandingPage() {
             hundreds of candidates have already applied.
           </p>
 
-          <div className="timeline-grid">
+          <div className="timeline-grid" style = {{fontSize: "54px"}}>
             {[
               { label: "Job Posted", bad: false },
               { label: "Indexed Days Later", bad: true },
@@ -560,7 +535,7 @@ export default function LandingPage() {
             style={{
               fontFamily: "var(--font-body)",
               fontWeight: 900,
-              fontSize: "clamp(28px, 4vw, 44px)",
+              fontSize: "60px",
               letterSpacing: "-0.025em",
               marginBottom: "12px",
               color: "var(--color-white)",
@@ -574,7 +549,7 @@ export default function LandingPage() {
           <p
             style={{
               color: "var(--color-white-65)",
-              fontSize: "16px",
+              fontSize: "20px",
               maxWidth: "600px",
               lineHeight: 1.7,
               marginBottom: "36px",
@@ -612,7 +587,7 @@ export default function LandingPage() {
             style={{
               fontFamily: "var(--font-body)",
               fontWeight: 900,
-              fontSize: "clamp(28px, 4vw, 44px)",
+              fontSize: "60px",
               letterSpacing: "-0.025em",
               marginBottom: "8px",
               color: "var(--color-white)",
@@ -623,11 +598,11 @@ export default function LandingPage() {
           <p
             style={{
               color: "var(--color-white-65)",
-              fontSize: "15px",
+              fontSize: "20px",
               marginBottom: "32px",
             }}
           >
-            Early applicants are 4× more likely to get an interview.
+            Early applicants are 4x more likely to get an interview.
           </p>
 
           <div className="usp-grid">
@@ -672,7 +647,7 @@ export default function LandingPage() {
               style={{
                 fontFamily: "var(--font-body)",
                 fontWeight: 900,
-                fontSize: "clamp(28px, 4vw, 44px)",
+                fontSize: "60px",
                 letterSpacing: "-0.025em",
                 marginBottom: "16px",
                 color: "var(--color-white)",
@@ -684,7 +659,7 @@ export default function LandingPage() {
             <p
               style={{
                 color: "var(--color-white-65)",
-                fontSize: "15px",
+                fontSize: "20px",
                 lineHeight: 1.7,
               }}
             >
@@ -725,96 +700,6 @@ export default function LandingPage() {
                   {i + 1}
                 </span>
                 {step}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── AI LAYER ──────────────────────────────────────────── */}
-      <section
-        className="section"
-        id="ai"
-        style={{ background: "rgba(99,102,241,0.03)" }}
-      >
-        <div className="section-inner">
-          <span className="section-label">AI Layer</span>
-          <h2
-            style={{
-              fontFamily: "var(--font-body)",
-              fontWeight: 900,
-              fontSize: "clamp(28px, 4vw, 44px)",
-              letterSpacing: "-0.025em",
-              marginBottom: "10px",
-              color: "var(--color-white)",
-            }}
-          >
-            More than a job tracker.
-          </h2>
-          <p
-            style={{
-              color: "var(--color-white-65)",
-              fontSize: "15px",
-              maxWidth: "560px",
-              lineHeight: 1.7,
-              marginBottom: "32px",
-            }}
-          >
-            CareerForge uses AI to help you understand your patterns, close
-            skill gaps, and build a concrete path to your target role.
-          </p>
-
-          <div className="ai-grid">
-            {AI_FEATURES.map((f) => (
-              <div
-                key={f.title}
-                className="cf-card"
-                style={{
-                  display: "flex",
-                  alignItems: "flex-start",
-                  justifyContent: "space-between",
-                  gap: "12px",
-                }}
-              >
-                <div>
-                  <p
-                    style={{
-                      fontFamily: "var(--font-body)",
-                      fontWeight: 900,
-                      fontSize: "15px",
-                      color: "var(--color-white)",
-                      margin: "0 0 4px",
-                    }}
-                  >
-                    {f.title}
-                  </p>
-                  <p
-                    style={{
-                      fontSize: "12px",
-                      color: "var(--color-white-40)",
-                      margin: 0,
-                    }}
-                  >
-                    {f.sub}
-                  </p>
-                </div>
-                <span
-                  style={{
-                    fontFamily: "var(--font-mono)",
-                    fontSize: "10px",
-                    letterSpacing: "0.12em",
-                    textTransform: "uppercase",
-                    color:
-                      f.status === "Live" ? "#4ade80" : "var(--color-white-40)",
-                    border: `1px solid ${f.status === "Live" ? "rgba(74,222,128,0.20)" : "var(--color-border)"}`,
-                    padding: "3px 8px",
-                    borderRadius: "999px",
-                    whiteSpace: "nowrap",
-                    flexShrink: 0,
-                  }}
-                >
-                  {f.status}
-                </span>
               </div>
             ))}
           </div>
@@ -883,10 +768,10 @@ export default function LandingPage() {
               className="btn-primary"
               href={"/register" as Route}
               style={{
-                  fontFamily: "var(--font-body)",
-                  fontSize: "20px",
-                  fontWeight: 900,
-                }}
+                fontFamily: "var(--font-body)",
+                fontSize: "20px",
+                fontWeight: 900,
+              }}
             >
               Create your profile →
             </Link>
@@ -912,25 +797,28 @@ export default function LandingPage() {
             gap: "12px",
           }}
         >
-          <span
-            style={{
-              fontFamily: "var(--font-body)",
-              fontWeight: 900,
-              fontSize: "16px",
-              letterSpacing: "-0.02em",
-            }}
-          >
-            Career<span style={{ color: "var(--color-orange)" }}>Forge</span>
-          </span>
           <p
             style={{
               fontFamily: "var(--font-body)",
-              fontSize: "13px",
+              fontSize: "15px",
               color: "var(--color-white-40)",
               margin: 0,
             }}
           >
             © {new Date().getFullYear()} CareerForge. Built to get you hired.
+          </p>
+          <p
+            style={{
+              fontFamily: "var(--font-body)",
+              fontSize: "15px",
+              color: "var(--color-white-65)",
+              margin: 0,
+            }}
+          >
+            Made with <span style={{ color: "#ef4444" }}>♥</span> by{" "}
+            <span style={{ color: "var(--color-white)", fontWeight: 700 }}>
+              Shubhanshu Singh
+            </span>
           </p>
         </div>
       </footer>

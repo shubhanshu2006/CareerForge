@@ -277,7 +277,7 @@ textarea {
 
 .section-label {
   font-family: var(--font-mono), monospace;
-  font-size: 11px;
+  font-size: 20px;
   font-weight: var(--fw-mono);
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -316,6 +316,7 @@ textarea {
   align-items: center;
   justify-content: center;
   padding: 24px;
+  position: relative;
 }
 
 .auth-split {
