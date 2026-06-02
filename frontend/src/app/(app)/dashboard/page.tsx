@@ -259,7 +259,6 @@ export default function DashboardPage() {
                   { href: "/jobs",        label: "Browse Jobs",        emoji: "🔍" },
                   { href: "/applications",label: "All Applications",   emoji: "📋" },
                   { href: "/saved",       label: "Saved Jobs",         emoji: "🔖" },
-                  { href: "/ai-search",   label: "AI Job Search",      emoji: "🤖" },
                   { href: "/ai-insights", label: "AI Insights",        emoji: "📊" },
                   { href: "/preferences", label: "Job Preferences",    emoji: "⚙️" },
                   { href: "/profile",     label: "My Profile",         emoji: "👤" },

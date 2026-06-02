@@ -164,13 +164,7 @@ export function createApi(getToken: () => Promise<string | null>) {
         body: JSON.stringify(body),
       }),
 
-    // ── Chat / AI Search ──────────────────────────────────────────────────────
-    chatSearch: (query: string) =>
-      req("/api/v1/chat/search", {
-        method: "POST",
-        body: JSON.stringify({ query }),
-      }),
-
+    // ── Chat / AI Search — removed
     // ── Monitoring (public) ───────────────────────────────────────────────────
     monitoringHealth: () =>
       apiRequest("/api/v1/monitoring/health", { method: "GET" }),
