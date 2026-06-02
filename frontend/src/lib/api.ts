@@ -139,31 +139,6 @@ export function createApi(getToken: () => Promise<string | null>) {
         body: JSON.stringify(data),
       }),
 
-    // ── AI Insights ───────────────────────────────────────────────────────────
-    interviewFailures: (body?: { limit?: number }) =>
-      req("/api/v1/ai/interview-failures", {
-        method: "POST",
-        body: JSON.stringify(body ?? {}),
-      }),
-
-    patternInsights: (body?: { limit?: number }) =>
-      req("/api/v1/ai/patterns", {
-        method: "POST",
-        body: JSON.stringify(body ?? {}),
-      }),
-
-    skillGaps: (body: { targetRole: string; targetSkills?: string[] }) =>
-      req("/api/v1/ai/skill-gaps", {
-        method: "POST",
-        body: JSON.stringify(body),
-      }),
-
-    roadmap: (body: { targetRole: string; weeks?: number }) =>
-      req("/api/v1/ai/roadmap", {
-        method: "POST",
-        body: JSON.stringify(body),
-      }),
-
     // ── Chat / AI Search — removed
     // ── Monitoring (public) ───────────────────────────────────────────────────
     monitoringHealth: () =>

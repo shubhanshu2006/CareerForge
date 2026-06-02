@@ -15,7 +15,6 @@ import {
   FaBars,
   FaChevronLeft,
   FaChevronRight,
-  FaChartBar,
   FaSlidersH,
   FaHeartbeat,
   FaHeart,
@@ -29,7 +28,6 @@ const NAV_ITEMS: { label: string; path: Route; icon: React.ReactNode }[] = [
   { label: "Saved Jobs",  path: "/saved",         icon: <FaBookmark /> },
   { label: "Preferences", path: "/preferences",   icon: <FaSlidersH /> },
   { label: "Profile",     path: "/profile",        icon: <FaUser /> },
-  { label: "AI Insights", path: "/ai-insights",   icon: <FaChartBar /> },
   { label: "Monitoring",  path: "/monitoring",    icon: <FaHeartbeat /> },
 ];
 
