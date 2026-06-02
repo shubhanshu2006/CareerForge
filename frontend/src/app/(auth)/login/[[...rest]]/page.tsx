@@ -1,5 +1,6 @@
 import { SignIn } from "@clerk/nextjs";
 import Link from "next/link";
+import type { Route } from "next";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -133,7 +134,7 @@ export default function LoginPage() {
             }}
           >
             Don&apos;t have an account?{" "}
-            <Link href="/register" style={{ color: "var(--color-orange)", fontWeight: 600 }}>
+            <Link href={"/register" as Route} style={{ color: "var(--color-orange)", fontWeight: 600 }}>
               Sign up
             </Link>
           </p>

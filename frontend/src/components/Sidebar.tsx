@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import type { Route } from "next";
 import { usePathname } from "next/navigation";
 import { useClerk } from "@clerk/nextjs";
 import {
@@ -21,7 +22,7 @@ import {
   FaHeart,
 } from "react-icons/fa";
 
-const NAV_ITEMS = [
+const NAV_ITEMS: { label: string; path: Route; icon: React.ReactNode }[] = [
   { label: "Dashboard",   path: "/dashboard",    icon: <FaTh /> },
   { label: "Browse Jobs", path: "/jobs",          icon: <FaSearch /> },
   { label: "For You",     path: "/for-you",       icon: <FaHeart /> },

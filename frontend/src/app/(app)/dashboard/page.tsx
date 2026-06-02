@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import type { Route } from "next";
 import { useAuth } from "@clerk/nextjs";
 import { toast } from "react-hot-toast";
 import AppHeader from "@/components/AppHeader";
@@ -204,7 +205,7 @@ export default function DashboardPage() {
                         <tr key={app.id} style={{ borderBottom: "1px solid rgba(46,46,46,0.5)" }}>
                           <td style={{ padding: "14px 20px" }}>
                             <Link
-                              href={`/jobs/${app.job?.id}`}
+                              href={`/jobs/${app.job?.id}` as Route}
                               style={{
                                 fontFamily: "var(--font-display)",
                                 fontWeight: 700,
@@ -254,7 +255,7 @@ export default function DashboardPage() {
                 </h2>
               </div>
               <div style={{ padding: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
-                {[
+                {([
                   { href: "/jobs",        label: "Browse Jobs",        emoji: "🔍" },
                   { href: "/applications",label: "All Applications",   emoji: "📋" },
                   { href: "/saved",       label: "Saved Jobs",         emoji: "🔖" },
@@ -262,7 +263,7 @@ export default function DashboardPage() {
                   { href: "/ai-insights", label: "AI Insights",        emoji: "📊" },
                   { href: "/preferences", label: "Job Preferences",    emoji: "⚙️" },
                   { href: "/profile",     label: "My Profile",         emoji: "👤" },
-                ].map((item) => (
+                ] satisfies { href: Route; label: string; emoji: string }[]).map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}

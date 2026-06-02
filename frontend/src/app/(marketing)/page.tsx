@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Route } from "next";
 import type { Metadata } from "next";
 import SplineHero from "@/components/SplineHero";
 
@@ -270,14 +271,14 @@ export default function LandingPage() {
             Career<span style={{ color: "var(--color-orange)" }}>Forge</span>
           </Link>
           <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-            <Link className="btn-ghost" href="/login" style={{
+            <Link className="btn-ghost" href={"/login" as Route} style={{
                   fontFamily: "var(--font-body)",
                   fontSize: "14px",
                   fontWeight: 900,
                 }}>
               Log in
             </Link>
-            <Link className="btn-primary" href="/register" style={{
+            <Link className="btn-primary" href={"/register" as Route} style={{
                   fontFamily: "var(--font-body)",
                   fontSize: "14px",
                   fontWeight: 900,
@@ -350,7 +351,7 @@ export default function LandingPage() {
             <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
               <Link
                 className="btn-primary"
-                href="/register"
+                href={"/register" as Route}
                  style={{
                   fontFamily: "var(--font-body)",
                   fontSize: "16px",
@@ -880,7 +881,7 @@ export default function LandingPage() {
             </p>
             <Link
               className="btn-primary"
-              href="/register"
+              href={"/register" as Route}
               style={{
                   fontFamily: "var(--font-body)",
                   fontSize: "20px",
