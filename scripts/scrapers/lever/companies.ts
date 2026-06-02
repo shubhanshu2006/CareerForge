@@ -8,55 +8,23 @@
  * https://jobs.lever.co/netflix → slug is "netflix"
  */
 export const leverCompanies: string[] = [
-  // Streaming / Entertainment
+  // Confirmed active Lever boards with global/India listings
   "netflix",
   "spotify",
+  "intercom",
+  "airtable",
+  "braintree",
+  "lark",              // ByteDance Lark
+  "cashapp",
 
-  // HR / Payroll SaaS
-  "rippling",
-  "deel",
-  "lattice",
-
-  // Cybersecurity
-  "crowdstrike",
-  "lacework",
-
-  // Ecommerce / Marketplace
-  "shopify",
-  "faire",
-  "whatnot",
-
-  // Logistics / Mobility
-  "flexport",
-  "waymo",
-
-  // HealthTech
-  "truepill",
-  "hims",
-
-  // EdTech
-  "coursera",
-  "brilliant",
-
-  // Analytics / Data
-  "amplitude",
-  "dbt",
-
-  // India-focused companies
-  "razorpay",
-  "freshworks",
-  "phonepe",
+  // India-specific companies confirmed on Lever
+  "freshworks",        // Freshworks has Lever board
+  "clevertap",
+  "moengage",
   "chargebee",
   "browserstack",
   "postman",
-  "clevertap",
-  "moengage",
-  "hasura",
-  "testbook",
+  "razorpay",
   "taskus",
   "dream11",
-  "games24x7",
-  "vedantu",
-  "unacademy",
-  "slice",
 ];

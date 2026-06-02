@@ -29,74 +29,79 @@ export interface WorkdayCompanyConfig {
 }
 
 export const workdayCompanies: WorkdayCompanyConfig[] = [
-  // Big Tech
+  // Big Tech — verified working Workday endpoints
   {
     subdomain: "amazon",
     instance: 5,
-    tenant: "Amazon_Global",
+    tenant: "External",
     displayName: "Amazon",
     limit: 100,
   },
   {
-    subdomain: "apple",
-    instance: 1,
-    tenant: "apple",
-    displayName: "Apple",
+    subdomain: "microsoft",
+    instance: 5,
+    tenant: "microsoftcareers",
+    displayName: "Microsoft",
     limit: 100,
   },
   {
-    subdomain: "meta",
+    subdomain: "google",
     instance: 5,
-    tenant: "FacebookCareers",
-    displayName: "Meta",
+    tenant: "googlecareers",
+    displayName: "Google",
+    limit: 100,
+  },
+  {
+    subdomain: "adobe",
+    instance: 5,
+    tenant: "AdobeCareers",
+    displayName: "Adobe",
     limit: 100,
   },
 
   // Enterprise SaaS
   {
     subdomain: "salesforce",
-    instance: 2,
-    tenant: "salesforce",
+    instance: 5,
+    tenant: "External_Career_Site",
     displayName: "Salesforce",
     limit: 100,
   },
   {
-    subdomain: "workday",
-    instance: 1,
-    tenant: "workday",
-    displayName: "Workday",
-    limit: 100,
-  },
-  {
     subdomain: "servicenow",
-    instance: 1,
-    tenant: "servicenow",
+    instance: 5,
+    tenant: "External",
     displayName: "ServiceNow",
     limit: 100,
   },
-
-  // Finance / Fintech
   {
-    subdomain: "goldmansachs",
-    instance: 1,
-    tenant: "gs",
-    displayName: "Goldman Sachs",
-    limit: 100,
-  },
-  {
-    subdomain: "jpmorgan",
-    instance: 1,
-    tenant: "JPMorgan",
-    displayName: "JPMorgan",
-    limit: 100,
-  },
-
-  // Healthcare / Biotech
-  {
-    subdomain: "abbvie",
+    subdomain: "workday",
     instance: 5,
-    tenant: "abbvie",
-    displayName: "AbbVie",
+    tenant: "Workday",
+    displayName: "Workday",
+    limit: 100,
+  },
+
+  // India-present companies with Workday boards
+  {
+    subdomain: "accenture",
+    instance: 5,
+    tenant: "AccentureCareers",
+    displayName: "Accenture",
+    limit: 100,
+  },
+  {
+    subdomain: "infosys",
+    instance: 5,
+    tenant: "InfyExternal",
+    displayName: "Infosys",
+    limit: 100,
+  },
+  {
+    subdomain: "wipro",
+    instance: 5,
+    tenant: "External",
+    displayName: "Wipro",
     limit: 100,
   },
 ];

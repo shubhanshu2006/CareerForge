@@ -75,7 +75,9 @@ export default function MonitoringPage() {
       if (healthRes) setHealth(healthRes as HealthData);
       if (runsRes) {
         const list = Array.isArray(runsRes) ? runsRes : (runsRes as { runs?: RunData[] }).runs ?? [];
-        setRuns(list as RunData[]);
+        // Only show active sources — filter out decommissioned pipelines
+        const active = ["GREENHOUSE", "ASHBY", "ADZUNA", "OTHER", "COMPANY_WEBSITE", "ALL"];
+        setRuns((list as RunData[]).filter((r) => !r.source || active.includes(r.source)));
       }
       if (aggsRes) setAggs(aggsRes as AggregateData);
     } catch {

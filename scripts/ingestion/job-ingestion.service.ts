@@ -1,16 +1,7 @@
 /**
  * Unified Job Ingestion Service (scripts layer).
  *
- * Orchestrates the full pipeline across all sources:
- *   Greenhouse + Lever + Ashby + Workday + Company Sites
- *       ↓
- *   Normalize (per source)
- *       ↓
- *   Deduplicate (scripts layer — two-stage: source+id then dedupeKey)
- *       ↓
- *   Ingest via backend ingestJobs() (DB write + match users)
- *       ↓
- *   Persist Metrics (file + DB)
+ * Active pipelines: Greenhouse + Ashby + CompanySites + Adzuna + SmartRecruiters
  */
 
 import dotenv from "dotenv";
@@ -25,20 +16,10 @@ import { greenhouseCompanies } from "../scrapers/greenhouse/companies.js";
 import { scrapeGreenhouse } from "../scrapers/greenhouse/greenhouse.scraper.js";
 import { normalizeGreenhouseJobs } from "../normalizers/greenhouse.normalizer.js";
 
-// ─── Lever ────────────────────────────────────────────────────────────────────
-import { leverCompanies } from "../scrapers/lever/companies.js";
-import { scrapeLever } from "../scrapers/lever/lever.scraper.js";
-import { normalizeLeverJobs } from "../normalizers/lever.normalizer.js";
-
 // ─── Ashby ────────────────────────────────────────────────────────────────────
 import { ashbyCompanies } from "../scrapers/ashby/companies.js";
 import { scrapeAshby } from "../scrapers/ashby/ashby.scraper.js";
 import { normalizeAshbyJobs } from "../normalizers/ashby.normalizer.js";
-
-// ─── Workday ──────────────────────────────────────────────────────────────────
-import { workdayCompanies } from "../scrapers/workday/companies.js";
-import { scrapeWorkday } from "../scrapers/workday/workday.scraper.js";
-import { normalizeWorkdayJobs } from "../normalizers/workday.normalizer.js";
 
 // ─── Company Sites (Playwright) ───────────────────────────────────────────────
 import { companySites } from "../scrapers/company-sites/companies.js";
@@ -54,11 +35,6 @@ import { normalizeSmartRecruitersJobs } from "../normalizers/smartrecruiters.nor
 import { adzunaSearches } from "../scrapers/adzuna/companies.js";
 import { scrapeAdzuna } from "../scrapers/adzuna/adzuna.scraper.js";
 import { normalizeAdzunaJobs } from "../normalizers/adzuna.normalizer.js";
-
-// ─── SkillCareerHub ───────────────────────────────────────────────────────────
-import { skillcareerhubSources } from "../scrapers/skillcareerhub/companies.js";
-import { scrapeSkillCareerHub } from "../scrapers/skillcareerhub/skillcareerhub.scraper.js";
-import { normalizeSkillCareerHubJobs } from "../normalizers/skillcareerhub.normalizer.js";
 
 // ─── Deduplication ────────────────────────────────────────────────────────────
 import { deduplicateJobs } from "../deduplication/deduplication.service.js";
@@ -172,27 +148,6 @@ export const runGreenhousePipeline = async (): Promise<PipelineResult> => {
   return result;
 };
 
-export const runLeverPipeline = async (): Promise<PipelineResult> => {
-  const metrics = new PipelineMetrics("LEVER");
-  console.log("[Lever] Starting scrape...");
-
-  const results = await scrapeLever(leverCompanies);
-  const normalized: NormalizedJob[] = [];
-
-  for (const { company, jobs } of results) {
-    const n = normalizeLeverJobs(jobs, company);
-    console.log(
-      `[Lever] ${company}: ${jobs.length} raw → ${n.length} normalized`,
-    );
-    metrics.recordFetched(company, n.length);
-    normalized.push(...n);
-  }
-
-  const result = await dedupeAndIngest("Lever", normalized, metrics);
-  await metrics.flush();
-  return result;
-};
-
 export const runAshbyPipeline = async (): Promise<PipelineResult> => {
   const metrics = new PipelineMetrics("ASHBY");
   console.log("[Ashby] Starting scrape...");
@@ -210,30 +165,6 @@ export const runAshbyPipeline = async (): Promise<PipelineResult> => {
   }
 
   const result = await dedupeAndIngest("Ashby", normalized, metrics);
-  await metrics.flush();
-  return result;
-};
-
-export const runWorkdayPipeline = async (): Promise<PipelineResult> => {
-  const metrics = new PipelineMetrics("WORKDAY");
-  console.log("[Workday] Starting scrape...");
-
-  const results = await scrapeWorkday(workdayCompanies);
-  const normalized: NormalizedJob[] = [];
-
-  for (const result of results) {
-    const n = normalizeWorkdayJobs(result);
-    console.log(
-      `[Workday] ${result.company.displayName}: ${result.jobs.length} raw → ${n.length} normalized`,
-    );
-    metrics.recordFetched(result.company.displayName, n.length);
-    if (result.error) {
-      metrics.recordError(result.company.displayName, result.error);
-    }
-    normalized.push(...n);
-  }
-
-  const result = await dedupeAndIngest("Workday", normalized, metrics);
   await metrics.flush();
   return result;
 };
@@ -300,58 +231,29 @@ export const runSmartRecruitersPipeline = async (): Promise<PipelineResult> => {
   return result;
 };
 
-export const runSkillCareerHubPipeline = async (): Promise<PipelineResult> => {  const metrics = new PipelineMetrics("SKILLCAREERHUB");
-  console.log("[SkillCareerHub] Starting scrape...");
-
-  const results = await scrapeSkillCareerHub(skillcareerhubSources);
-  const normalized: NormalizedJob[] = [];
-
-  for (const { company, jobs } of results) {
-    const n = normalizeSkillCareerHubJobs(jobs);
-    console.log(
-      `[SkillCareerHub] ${company}: ${jobs.length} raw → ${n.length} normalized`,
-    );
-    metrics.recordFetched(company, n.length);
-    normalized.push(...n);
-  }
-
-  const result = await dedupeAndIngest("SkillCareerHub", normalized, metrics);
-  await metrics.flush();
-  return result;
-};
-
 // ─── Unified Runner ───────────────────────────────────────────────────────────
 
 /**
- * Run ALL pipelines concurrently and aggregate results.
- * Workday and CompanySites run after the API-based scrapers complete.
+ * Active pipelines: Greenhouse + Ashby + Adzuna + CompanySites + SmartRecruiters
  */
 export const runAllPipelines = async (): Promise<PipelineResult> => {
   const metrics = new PipelineMetrics("ALL");
 
   // API-based scrapers run concurrently
-  const [gh, lv, ab, az, sch] = await Promise.allSettled([
+  const [gh, ab, az] = await Promise.allSettled([
     runGreenhousePipeline(),
-    runLeverPipeline(),
     runAshbyPipeline(),
     runAdzunaPipeline(),
-    runSkillCareerHubPipeline(),
   ]);
 
-  // Workday and CompanySites run after (they're heavier)
-  const [wd, cs, sr] = await Promise.allSettled([
-    runWorkdayPipeline(),
+  // CompanySites and SmartRecruiters run after (they're heavier)
+  const [cs, sr] = await Promise.allSettled([
     runCompanySitesPipeline(),
     runSmartRecruitersPipeline(),
   ]);
 
   const aggregate: PipelineResult = {
-    fetched: 0,
-    inserted: 0,
-    skipped: 0,
-    errors: 0,
-    alertsGenerated: 0,
-    emailsEnqueued: 0,
+    fetched: 0, inserted: 0, skipped: 0, errors: 0, alertsGenerated: 0, emailsEnqueued: 0,
   };
 
   const merge = (label: string, result: PipelineResult) => {
@@ -370,52 +272,19 @@ export const runAllPipelines = async (): Promise<PipelineResult> => {
   };
 
   if (gh.status === "fulfilled") merge("Greenhouse", gh.value);
-  else {
-    console.error("[Greenhouse] Pipeline failed:", gh.reason);
-    metrics.recordError("Greenhouse", String(gh.reason));
-  }
-
-  if (lv.status === "fulfilled") merge("Lever", lv.value);
-  else {
-    console.error("[Lever] Pipeline failed:", lv.reason);
-    metrics.recordError("Lever", String(lv.reason));
-  }
+  else { console.error("[Greenhouse] Pipeline failed:", gh.reason); metrics.recordError("Greenhouse", String(gh.reason)); }
 
   if (ab.status === "fulfilled") merge("Ashby", ab.value);
-  else {
-    console.error("[Ashby] Pipeline failed:", ab.reason);
-    metrics.recordError("Ashby", String(ab.reason));
-  }
+  else { console.error("[Ashby] Pipeline failed:", ab.reason); metrics.recordError("Ashby", String(ab.reason)); }
 
   if (az.status === "fulfilled") merge("Adzuna", az.value);
-  else {
-    console.error("[Adzuna] Pipeline failed:", az.reason);
-    metrics.recordError("Adzuna", String(az.reason));
-  }
-
-  if (sch.status === "fulfilled") merge("SkillCareerHub", sch.value);
-  else {
-    console.error("[SkillCareerHub] Pipeline failed:", sch.reason);
-    metrics.recordError("SkillCareerHub", String(sch.reason));
-  }
-
-  if (wd.status === "fulfilled") merge("Workday", wd.value);
-  else {
-    console.error("[Workday] Pipeline failed:", wd.reason);
-    metrics.recordError("Workday", String(wd.reason));
-  }
+  else { console.error("[Adzuna] Pipeline failed:", az.reason); metrics.recordError("Adzuna", String(az.reason)); }
 
   if (cs.status === "fulfilled") merge("CompanySites", cs.value);
-  else {
-    console.error("[CompanySites] Pipeline failed:", cs.reason);
-    metrics.recordError("CompanySites", String(cs.reason));
-  }
+  else { console.error("[CompanySites] Pipeline failed:", cs.reason); metrics.recordError("CompanySites", String(cs.reason)); }
 
   if (sr.status === "fulfilled") merge("SmartRecruiters", sr.value);
-  else {
-    console.error("[SmartRecruiters] Pipeline failed:", sr.reason);
-    metrics.recordError("SmartRecruiters", String(sr.reason));
-  }
+  else { console.error("[SmartRecruiters] Pipeline failed:", sr.reason); metrics.recordError("SmartRecruiters", String(sr.reason)); }
 
   await metrics.flush();
   return aggregate;

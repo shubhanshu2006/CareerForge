@@ -41,6 +41,9 @@ export type PipelineSource =
   | "ADZUNA"
   | "SKILLCAREERHUB"
   | "WORKDAY"
+  | "WORKABLE"
+  | "RECRUITEE"
+  | "PERSONIO"
   | "COMPANY_WEBSITE"
   | "ALL";
 
