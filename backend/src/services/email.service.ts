@@ -40,18 +40,21 @@ const renderEmailTemplate = (input: {
   bodyHtml: string;
   cta?: { label: string; url: string };
   infoHtml?: string;
+  accentColor?: string;
 }) => {
   const year = new Date().getFullYear();
+  const accent = input.accentColor || "#f97316";
+  const accentDark = "#ea580c";
   const ctaHtml = input.cta
-    ? `<div style="text-align: center; margin: 35px 0;">
-          <a href="${input.cta.url}" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; padding: 15px 40px; border-radius: 50px; text-decoration: none; font-size: 16px; font-weight: 700; display: inline-block; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);">
-            ${input.cta.label}
+    ? `<div style="text-align: center; margin: 36px 0 8px;">
+          <a href="${input.cta.url}" style="background: linear-gradient(135deg, ${accent} 0%, ${accentDark} 100%); color: #ffffff; padding: 16px 44px; border-radius: 50px; text-decoration: none; font-size: 15px; font-weight: 700; display: inline-block; box-shadow: 0 8px 24px rgba(249, 115, 22, 0.35); letter-spacing: 0.02em;">
+            ${input.cta.label} &nbsp;→
           </a>
         </div>`
     : "";
   const infoHtml = input.infoHtml
-    ? `<div style="background: #fff9e6; border-left: 4px solid #fbbf24; padding: 20px; border-radius: 6px; margin: 25px 0;">
-          <p style="margin: 0; color: #92400e; font-size: 14px;">
+    ? `<div style="background: #fff7ed; border: 1px solid #fed7aa; border-left: 4px solid ${accent}; padding: 16px 20px; border-radius: 8px; margin: 28px 0;">
+          <p style="margin: 0; color: #7c2d12; font-size: 14px; line-height: 1.6;">
             ${input.infoHtml}
           </p>
         </div>`
@@ -64,30 +67,49 @@ const renderEmailTemplate = (input: {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>${input.title}</title>
 </head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5;">
-  <div style="width: 100%; max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-      <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px; text-align: center; color: #ffffff;">
-        <h1 style="margin: 0; font-size: 32px; font-weight: 700;">${input.title}</h1>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: #0a0a0b;">
+  <div style="width: 100%; max-width: 620px; margin: 0 auto; padding: 32px 16px;">
+
+    <div style="background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);">
+
+      <!-- Hero header -->
+      <div style="background: radial-gradient(circle at 80% 20%, rgba(249, 115, 22, 0.25), transparent 50%), linear-gradient(135deg, #0f0f12 0%, #1a1a1f 100%); padding: 48px 32px 56px; text-align: center; position: relative;">
+        <div style="display: inline-block; background: rgba(249, 115, 22, 0.1); border: 1px solid rgba(249, 115, 22, 0.3); border-radius: 999px; padding: 6px 16px; margin-bottom: 20px;">
+          <span style="color: ${accent}; font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;">⚡ Welcome aboard</span>
+        </div>
+        <h1 style="margin: 0; font-size: 36px; font-weight: 800; color: #ffffff; letter-spacing: -0.02em; line-height: 1.1;">${input.title}</h1>
       </div>
 
-      <div style="padding: 40px 20px; color: #333333; line-height: 1.6;">
-        <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 20px; border-radius: 8px; margin-bottom: 30px; color: #ffffff;">
-          <h2 style="margin: 0; font-size: 24px; font-weight: 700;">Hello ${input.greetingName}!</h2>
-        </div>
+      <!-- Body -->
+      <div style="padding: 40px 36px; color: #1f2937; line-height: 1.7; background: #ffffff;">
+
+        <!-- Greeting -->
+        <p style="margin: 0 0 6px; font-size: 15px; color: #6b7280; font-weight: 500;">Hey there 👋</p>
+        <h2 style="margin: 0 0 24px; font-size: 26px; font-weight: 800; color: #111827; letter-spacing: -0.01em;">${input.greetingName}, welcome to CareerForge.</h2>
 
         ${input.bodyHtml}
 
         ${ctaHtml}
 
+        <!-- Signature -->
+        <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid #f3f4f6;">
+          <p style="margin: 0; font-size: 14px; color: #6b7280;">With excitement,</p>
+          <p style="margin: 4px 0 0; font-size: 16px; font-weight: 700; color: #111827;">Shubhanshu Singh</p>
+          <p style="margin: 2px 0 0; font-size: 13px; color: #9ca3af;">Founder, CareerForge</p>
+        </div>
+
         ${infoHtml}
       </div>
 
-      <div style="background: linear-gradient(135deg, #1f2937 0%, #111827 100%); padding: 25px 20px; text-align: center; color: #9ca3af; font-size: 13px; border-top: 3px solid #667eea;">
-        <p style="margin: 0;">
-          © ${year} <strong style="color: #ffffff;">CareerForge</strong>. All rights reserved.
+      <!-- Footer -->
+      <div style="background: #0f0f12; padding: 28px 32px; text-align: center; color: #6b7280; font-size: 13px;">
+        <p style="margin: 0; color: #ffffff; font-weight: 700; font-size: 15px; letter-spacing: -0.01em;">
+          Career<span style="color: ${accent};">Forge</span>
         </p>
-        <p style="margin: 8px 0 0 0; font-size: 12px;">
+        <p style="margin: 6px 0 0; font-size: 12px; color: #6b7280;">
+          © ${year} CareerForge. Built to get you hired.
+        </p>
+        <p style="margin: 12px 0 0; font-size: 11px; color: #4b5563;">
           This is an automated email — please do not reply.
         </p>
       </div>
@@ -103,20 +125,61 @@ export const sendWelcomeEmail = async (userId: number) => {
     throw new ApiError(404, "User email not found");
   }
 
+  const firstName = (user.username || "there").split(/[\s_]+/)[0] || "there";
+  const dashboardUrl = `${(process.env.APP_URL || "https://careerforge.ai").replace(/\/$/, "")}/dashboard`;
+
+  const bodyHtml = `
+    <p style="margin: 0 0 18px; font-size: 16px; color: #374151; line-height: 1.7;">
+      I'm <strong style="color: #111827;">Shubhanshu Singh</strong>, the founder of CareerForge — and I'm genuinely thrilled to have you here. You just took the first step toward never missing the right opportunity again.
+    </p>
+
+    <p style="margin: 0 0 24px; font-size: 16px; color: #374151; line-height: 1.7;">
+      Here's what you can do right now:
+    </p>
+
+    <div style="background: #f9fafb; border-radius: 12px; padding: 20px 24px; margin: 0 0 28px;">
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse: collapse;">
+        <tr>
+          <td style="padding: 8px 0; font-size: 15px; color: #1f2937; line-height: 1.5;">
+            <span style="color: ${"#f97316"}; font-weight: 700; margin-right: 8px;">✦</span> Set your preferences — roles, locations, and comp range
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; font-size: 15px; color: #1f2937; line-height: 1.5;">
+            <span style="color: ${"#f97316"}; font-weight: 700; margin-right: 8px;">✦</span> Get alerts in <strong>&lt; 5 minutes</strong> of new postings
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; font-size: 15px; color: #1f2937; line-height: 1.5;">
+            <span style="color: ${"#f97316"}; font-weight: 700; margin-right: 8px;">✦</span> Track every application, note, and status in one place
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; font-size: 15px; color: #1f2937; line-height: 1.5;">
+            <span style="color: ${"#f97316"}; font-weight: 700; margin-right: 8px;">✦</span> Practice with AI-powered interview analysis
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <p style="margin: 0; font-size: 16px; color: #374151; line-height: 1.7;">
+      The early bird really does get the role — our data shows early applicants are <strong style="color: #111827;">4× more likely</strong> to land an interview. Let's make sure you're always early.
+    </p>
+  `;
+
   await sendEmail({
     to: { email: user.email, name: user.username },
-    subject: "Welcome to CareerForge",
+    subject: `Welcome to CareerForge, ${firstName}! ⚡`,
     htmlContent: renderEmailTemplate({
-      title: "Welcome to CareerForge",
-      greetingName: user.username,
-      bodyHtml: `<p style="margin: 20px 0; font-size: 16px; color: #555;">Welcome to CareerForge. You are all set to start tracking jobs, interviews, and opportunities.</p>
-        <p style="margin: 20px 0; font-size: 16px; color: #555;">Your dashboard is ready, and job alerts will start as soon as matches appear.</p>`,
+      title: "You're in. Let's get you hired.",
+      greetingName: firstName,
+      bodyHtml,
       cta: {
-        label: "Open Dashboard",
-        url: process.env.APP_URL || "https://careerforge.ai",
+        label: "Open your dashboard",
+        url: dashboardUrl,
       },
       infoHtml:
-        "If you did not create this account, you can ignore this email.",
+        "If you didn't create this account, you can safely ignore this email — no action needed.",
     }),
   });
 };

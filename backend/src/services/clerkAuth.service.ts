@@ -10,6 +10,7 @@ import {
   findUserByUsername,
   updateUserLoginMetadata,
 } from "../repositories/auth.repository.js";
+import { sendWelcomeEmail } from "./email.service.js";
 
 const getClerkSecretKey = () => {
   const secret = process.env.CLERK_SECRET_KEY;
@@ -98,6 +99,7 @@ const getOrCreateUserFromClerk = async (user: User) => {
   const profilePictureUrl = resolveProfilePicture(user);
 
   let dbUser = email ? await findUserByEmail(email) : null;
+  const isNewUser = !dbUser;
 
   if (!dbUser) {
     const seed = user.username || email || `user_${providerUserId}`;
@@ -126,6 +128,12 @@ const getOrCreateUserFromClerk = async (user: User) => {
     lastLoginAt: new Date(),
     failedLoginAttempts: 0,
   });
+
+  if (isNewUser && email) {
+    sendWelcomeEmail(dbUser.id).catch((err) => {
+      console.error("[welcome-email] failed for new user", dbUser.id, err);
+    });
+  }
 
   return dbUser;
 };
