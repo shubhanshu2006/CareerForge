@@ -2,6 +2,7 @@ import { ApiError } from "../utils/ApiError.js";
 import {
   findJobById,
   findJobs,
+  getJobTypeCounts,
   JobFilters,
   JobSort,
 } from "../repositories/jobs.repository.js";
@@ -27,6 +28,8 @@ export const getJobs = async (input: {
     items,
   };
 };
+
+export const getJobCounts = () => getJobTypeCounts();
 
 export const getJobById = async (id: number) => {
   const job = await findJobById(id);

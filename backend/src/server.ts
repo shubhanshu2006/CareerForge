@@ -22,7 +22,7 @@ process.on("SIGINT", shutdown);
 
 connectDB()
   .then(async () => {
-    // Start the 5-minute repeatable ingestion scheduler
+    // Start the hourly repeatable ingestion scheduler
     await startScheduler();
 
     app.listen(PORT, () => {

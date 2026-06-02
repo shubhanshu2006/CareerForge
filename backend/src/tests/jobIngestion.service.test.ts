@@ -22,7 +22,6 @@ vi.mock("../services/job-matching.service.js", () => ({
 vi.mock("../queues/index.js", () => ({
   emailQueue: { add: vi.fn() },
   jobIngestionQueue: { add: vi.fn() },
-  notificationQueue: { add: vi.fn() },
 }));
 
 // ─── Typed references to mocks ────────────────────────────────────────────────

@@ -4,12 +4,20 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { jobsQuerySchema } from "../validators/jobs.validators.js";
-import { getJobById, getJobs } from "../services/jobs.service.js";
+import { getJobById, getJobCounts, getJobs } from "../services/jobs.service.js";
 
 const buildFilters = (data: {
   title?: string;
   company?: string;
   location?: string;
+  employmentType?:
+    | "FULL_TIME"
+    | "PART_TIME"
+    | "CONTRACT"
+    | "INTERNSHIP"
+    | "TEMPORARY"
+    | "FREELANCE";
+  workType?: "REMOTE" | "ONSITE" | "HYBRID";
   remote?: boolean;
   experience?: "ENTRY" | "JUNIOR" | "MID" | "SENIOR" | "LEAD" | "EXECUTIVE";
   salaryMin?: number;
@@ -19,6 +27,8 @@ const buildFilters = (data: {
   title: data.title,
   company: data.company,
   location: data.location,
+  employmentType: data.employmentType,
+  workType: data.workType,
   remote: data.remote,
   experience: data.experience,
   salaryMin: data.salaryMin,
@@ -70,4 +80,9 @@ export const getJob = asyncHandler(async (req: Request, res: Response) => {
   const result = await getJobById(id);
 
   return res.status(200).json(new ApiResponse(200, result, "Job fetched"));
+});
+
+export const getJobCountsHandler = asyncHandler(async (_req: Request, res: Response) => {
+  const counts = await getJobCounts();
+  return res.status(200).json(new ApiResponse(200, counts, "Job counts fetched"));
 });

@@ -37,6 +37,7 @@ const userSelect = {
   jobPreferences: {
     select: {
       emailEnabled: true,
+      titles: { select: { title: true } },
       skills: { select: { skill: true } },
     },
   },
@@ -47,6 +48,7 @@ type MatchedUser = {
   email: string | null;
   jobPreferences: {
     emailEnabled: boolean;
+    titles: { title: string }[];
     skills: { skill: string }[];
   } | null;
 };
@@ -77,18 +79,6 @@ const findNonSkillCandidates = async (
               preferredCompanies: {
                 some: {
                   companyName: { equals: input.company, mode: "insensitive" },
-                },
-              },
-            },
-            // Preferred title match (job title contains user's preference)
-            {
-              jobPreferences: {
-                is: {
-                  titles: {
-                    some: {
-                      title: { contains: input.title, mode: "insensitive" },
-                    },
-                  },
                 },
               },
             },
@@ -169,6 +159,35 @@ const findSkillMatchedUsers = async (
   );
 };
 
+const findTitleMatchedUsers = async (
+  jobTitleLower: string,
+): Promise<MatchedUser[]> => {
+  const usersWithTitles = (await prisma.user.findMany({
+    where: {
+      email: { not: null },
+      accountEnabled: true,
+      accountLocked: false,
+      emailVerified: true,
+      AND: [
+        {
+          OR: [
+            { jobPreferences: { is: { emailEnabled: true } } },
+            { jobPreferences: { is: null } },
+          ],
+        },
+        { jobPreferences: { is: { titles: { some: {} } } } },
+      ],
+    },
+    select: userSelect,
+  })) as MatchedUser[];
+
+  return usersWithTitles.filter((u) =>
+    u.jobPreferences?.titles?.some((t) =>
+      jobTitleLower.includes(t.title.toLowerCase()),
+    ),
+  );
+};
+
 // ─── Main entry point ─────────────────────────────────────────────────────────
 
 /**
@@ -181,19 +200,27 @@ export const matchJobToUsers = async (
   input: JobMatchInput,
 ): Promise<{ notified: number }> => {
   const descLower = (input.description ?? "").toLowerCase();
+  const titleLower = input.title.toLowerCase();
 
   // Run both query passes concurrently
-  const [nonSkillCandidates, skillCandidates] = await Promise.all([
+  const [nonSkillCandidates, titleCandidates, skillCandidates] =
+    await Promise.all([
     findNonSkillCandidates(input),
+    titleLower.length > 0
+      ? findTitleMatchedUsers(titleLower)
+      : Promise.resolve<MatchedUser[]>([]),
     descLower.length > 0
       ? findSkillMatchedUsers(descLower)
       : Promise.resolve<MatchedUser[]>([]),
-  ]);
+    ]);
 
   // Union both sets by user ID — no user should receive duplicate alerts
   const allById = new Map<number, MatchedUser>(
     nonSkillCandidates.map((u) => [u.id, u]),
   );
+  for (const u of titleCandidates) {
+    if (!allById.has(u.id)) allById.set(u.id, u);
+  }
   for (const u of skillCandidates) {
     if (!allById.has(u.id)) allById.set(u.id, u);
   }
@@ -236,7 +263,7 @@ export const matchJobToUsers = async (
 
   console.log(
     `[Matching] Job #${input.jobId} "${input.title}" matched ${matched.length} user(s) ` +
-      `(${nonSkillCandidates.length} preference, ${skillCandidates.length} skill)`,
+      `(${nonSkillCandidates.length} base, ${titleCandidates.length} title, ${skillCandidates.length} skill)`,
   );
 
   return { notified: matched.length };

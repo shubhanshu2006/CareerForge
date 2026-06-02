@@ -1,6 +1,6 @@
 import { jobIngestionQueue } from "../queues/index.js";
 
-const REPEAT_EVERY_MS = 5 * 60 * 1000; // 5 minutes
+const REPEAT_EVERY_MS = 60 * 60 * 1000; // 1 hour
 
 const SCHEDULER_JOB_NAME = "scheduled-ingestion";
 
@@ -29,7 +29,7 @@ export const startScheduler = async (): Promise<void> => {
     );
 
     console.log(
-      `[Scheduler] Job ingestion scheduled — runs every ${REPEAT_EVERY_MS / 60_000} minutes`,
+      `[Scheduler] Job ingestion scheduled — runs every ${REPEAT_EVERY_MS / 3_600_000} hour(s)`,
     );
   } catch (err) {
     console.error("[Scheduler] Failed to start scheduler:", err);

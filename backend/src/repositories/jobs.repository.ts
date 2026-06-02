@@ -1,10 +1,12 @@
 import { prisma } from "../config/prisma.js";
-import type { ExperienceLevel } from "../../generated/prisma/index.js";
+import type { ExperienceLevel, EmploymentType, Prisma } from "../../generated/prisma/index.js";
 
 export type JobFilters = {
   title?: string;
   company?: string;
   location?: string;
+  employmentType?: EmploymentType;
+  workType?: "REMOTE" | "ONSITE" | "HYBRID";
   remote?: boolean;
   experience?: ExperienceLevel;
   salaryMin?: number;
@@ -19,6 +21,37 @@ export const findJobById = (id: number) =>
     where: { id },
   });
 
+export const getJobTypeCounts = async () => {
+  const [all, fullTime, internship] = await Promise.all([
+    prisma.job.count({ where: { isActive: true } }),
+    prisma.job.count({
+      where: {
+        isActive: true,
+        OR: [
+          { employmentType: "FULL_TIME" },
+          {
+            employmentType: null,
+            AND: [
+              { NOT: { title: { contains: "intern", mode: "insensitive" } } },
+            ],
+          },
+        ],
+      },
+    }),
+    prisma.job.count({
+      where: {
+        isActive: true,
+        OR: [
+          { employmentType: "INTERNSHIP" },
+          { title: { contains: "intern", mode: "insensitive" } },
+        ],
+      },
+    }),
+  ]);
+
+  return { all, fullTime, internship };
+};
+
 export const findJobs = async (input: {
   filters: JobFilters;
   sort: JobSort;
@@ -26,8 +59,15 @@ export const findJobs = async (input: {
   take: number;
 }) => {
   const { filters } = input;
-  const where: Record<string, unknown> = {
+  const where: Prisma.JobWhereInput = {
     isActive: true,
+  };
+  const andConditions = (
+    current: Prisma.JobWhereInput["AND"],
+    condition: Prisma.JobWhereInput,
+  ): Prisma.JobWhereInput[] => {
+    if (!current) return [condition];
+    return Array.isArray(current) ? [...current, condition] : [current, condition];
   };
 
   if (filters.title) {
@@ -45,8 +85,73 @@ export const findJobs = async (input: {
       mode: "insensitive",
     };
   }
+  if (filters.employmentType) {
+    const employmentNeedle = filters.employmentType.toLowerCase().replace(/_/g, " ");
+    const hyphenNeedle = employmentNeedle.replace(/ /g, "-");
+    const keywordMap: Record<string, string[]> = {
+      FULL_TIME: ["full time", "full-time", "permanent", "regular"],
+      PART_TIME: ["part time", "part-time"],
+      CONTRACT: ["contract", "temporary", "temp", "freelance"],
+      INTERNSHIP: ["intern", "internship", "trainee"],
+      TEMPORARY: ["temporary", "temp"],
+      FREELANCE: ["freelance", "contract"],
+    };
+    const keywords = keywordMap[filters.employmentType] ?? [employmentNeedle, hyphenNeedle];
+    const keywordOr = keywords.flatMap((keyword) => [
+      { description: { contains: keyword, mode: "insensitive" as const } },
+      { title: { contains: keyword, mode: "insensitive" as const } },
+    ]);
+
+    if (filters.employmentType === "FULL_TIME") {
+      where.AND = andConditions(where.AND, {
+        OR: [
+          { employmentType: filters.employmentType },
+          ...keywordOr,
+          {
+            NOT: {
+              OR: [
+                { title: { contains: "intern", mode: "insensitive" } },
+                { description: { contains: "intern", mode: "insensitive" } },
+                { title: { contains: "part-time", mode: "insensitive" } },
+                { description: { contains: "part-time", mode: "insensitive" } },
+                { title: { contains: "contract", mode: "insensitive" } },
+                { description: { contains: "contract", mode: "insensitive" } },
+                { title: { contains: "freelance", mode: "insensitive" } },
+                { description: { contains: "freelance", mode: "insensitive" } },
+              ],
+            },
+          },
+        ],
+      });
+    } else {
+      where.AND = andConditions(where.AND, {
+        OR: [{ employmentType: filters.employmentType }, ...keywordOr],
+      });
+    }
+  }
   if (filters.remote !== undefined) {
     where.isRemote = filters.remote;
+  }
+  if (filters.workType) {
+    if (filters.workType === "REMOTE") {
+      where.isRemote = true;
+    } else if (filters.workType === "ONSITE") {
+      where.isRemote = false;
+      where.AND = andConditions(where.AND, {
+        OR: [
+          { location: null },
+          { NOT: { location: { contains: "hybrid", mode: "insensitive" } } },
+        ],
+      });
+    } else if (filters.workType === "HYBRID") {
+      where.isRemote = false;
+      where.AND = andConditions(where.AND, {
+        OR: [
+          { location: { contains: "hybrid", mode: "insensitive" } },
+          { description: { contains: "hybrid", mode: "insensitive" } },
+        ],
+      });
+    }
   }
   if (filters.experience) {
     where.experienceLevel = filters.experience;
@@ -58,27 +163,28 @@ export const findJobs = async (input: {
     where.minSalary = { lte: filters.salaryMax };
   }
   if (filters.query) {
-    where.OR = [
-      {
-        title: {
-          contains: filters.query,
-          mode: "insensitive",
-        },
-      },
-      {
-        company: {
-          contains: filters.query,
-          mode: "insensitive",
-        },
-      },
-      {
-        description: {
-          contains: filters.query,
-          mode: "insensitive",
-        },
-      },
-    ];
+    const normalizedQuery = filters.query.trim();
+    // Split into individual words so "Backend Developer" matches
+    // "Senior Backend Engineer" and "Node.js Developer" separately
+    const words = normalizedQuery.split(/\s+/).filter((w) => w.length > 1);
+    const termConditions = words.flatMap((word) => [
+      { title: { contains: word, mode: "insensitive" as const } },
+      { company: { contains: word, mode: "insensitive" as const } },
+      { description: { contains: word, mode: "insensitive" as const } },
+      { department: { contains: word, mode: "insensitive" as const } },
+    ]);
+    where.AND = andConditions(where.AND, { OR: termConditions });
   }
+
+  // 3-month staleness filter — never show jobs older than 90 days
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 90);
+  where.AND = andConditions(where.AND, {
+    OR: [
+      { postedAt: { gte: cutoff } },
+      { postedAt: null, createdAt: { gte: cutoff } },
+    ],
+  });
 
   const orderBy = (() => {
     switch (input.sort) {

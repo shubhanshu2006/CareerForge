@@ -20,8 +20,3 @@ export const jobIngestionQueue = new Queue("jobIngestionQueue", {
   connection: redisConnection,
   defaultJobOptions,
 });
-
-export const notificationQueue = new Queue("notificationQueue", {
-  connection: redisConnection,
-  defaultJobOptions,
-});
