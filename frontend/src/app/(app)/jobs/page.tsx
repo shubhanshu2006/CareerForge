@@ -10,6 +10,8 @@ import { createApi, extractItems, unwrap } from "@/lib/api";
 import { FaSearch, FaFilter, FaTimes } from "react-icons/fa";
 
 const EXPERIENCE_OPTIONS = ["", "ENTRY", "JUNIOR", "MID", "SENIOR", "LEAD", "EXECUTIVE"];
+const EMPLOYMENT_TYPE_OPTIONS = ["", "FULL_TIME", "PART_TIME", "CONTRACT", "INTERNSHIP", "TEMPORARY", "FREELANCE"];
+const WORK_TYPE_OPTIONS = ["", "REMOTE", "ONSITE", "HYBRID"];
 const SORT_OPTIONS = [
   { value: "latest",    label: "Latest" },
   { value: "relevance", label: "Relevance" },
@@ -34,11 +36,17 @@ export default function JobsPage() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
+  const [counts, setCounts] = useState<{ all: number; fullTime: number; internship: number } | null>(null);
 
   // Filters
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
+  const [company, setCompany] = useState(searchParams.get("company") ?? "");
   const [location, setLocation] = useState(searchParams.get("location") ?? "");
   const [experience, setExperience] = useState(searchParams.get("experience") ?? "");
+  const [employmentType, setEmploymentType] = useState(searchParams.get("employmentType") ?? "");
+  const [workType, setWorkType] = useState(searchParams.get("workType") ?? "");
+  const [salaryMin, setSalaryMin] = useState(searchParams.get("salaryMin") ?? "");
+  const [salaryMax, setSalaryMax] = useState(searchParams.get("salaryMax") ?? "");
   const [remote, setRemote] = useState(searchParams.get("remote") === "true");
   const [sort, setSort] = useState(searchParams.get("sort") ?? "latest");
   const [showFilters, setShowFilters] = useState(false);
@@ -54,8 +62,13 @@ export default function JobsPage() {
       const params: Record<string, string | number | boolean | undefined> = {
         page: pg, limit: 20, sort,
         ...(normalizedQuery ? { q: normalizedQuery } : {}),
+        ...(company ? { company } : {}),
         ...(location ? { location } : {}),
         ...(experience ? { experience } : {}),
+        ...(employmentType ? { employmentType } : {}),
+        ...(workType ? { workType } : {}),
+        ...(salaryMin ? { salaryMin: Number(salaryMin) } : {}),
+        ...(salaryMax ? { salaryMax: Number(salaryMax) } : {}),
         ...(remote ? { remote: true } : {}),
       };
       const raw = await api.searchJobs(params);
@@ -75,7 +88,19 @@ export default function JobsPage() {
       setLoading(false);
       setLoadingMore(false);
     }
-  }, [isLoaded, sort, query, location, experience, remote]);
+  }, [isLoaded, sort, query, company, location, experience, employmentType, workType, salaryMin, salaryMax, remote]);
+
+  // Fetch job type counts once on mount — no auth needed, public endpoint
+  useEffect(() => {
+    const base = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
+    fetch(`${base}/api/v1/jobs/counts`)
+      .then((r) => r.json())
+      .then((json) => {
+        const data = json?.data ?? json;
+        if (data && typeof data.all === "number") setCounts(data);
+      })
+      .catch(() => {/* non-critical */});
+  }, []);
 
   // Initial load
   useEffect(() => {
@@ -103,9 +128,9 @@ export default function JobsPage() {
   };
 
   const clearFilters = () => {
-    setQuery(""); setLocation(""); setExperience(""); setRemote(false); setSort("latest");
+    setQuery(""); setCompany(""); setLocation(""); setWorkType("");
   };
-  const hasActiveFilters = query || location || experience || remote || sort !== "latest";
+  const hasActiveFilters = query || company || location || workType;
 
   return (
     <>
@@ -161,6 +186,56 @@ export default function JobsPage() {
             </p>
           </div>
 
+          {/* Job type tabs */}
+          <div style={{ display: "flex", gap: "8px", marginBottom: "20px", flexWrap: "wrap" }} suppressHydrationWarning>
+            {[
+              { label: "All", count: counts?.all ?? null, type: "" },
+              { label: "Full-Time", count: counts?.fullTime ?? null, type: "FULL_TIME" },
+              { label: "Intern", count: counts?.internship ?? null, type: "INTERNSHIP" },
+            ].map(({ label, count, type }) => {
+              const active = employmentType === type;
+              return (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => {
+                    setEmploymentType(type);
+                  }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "8px 16px",
+                    borderRadius: "999px",
+                    border: `1px solid ${active ? "var(--color-orange)" : "var(--color-border)"}`,
+                    background: active ? "var(--color-orange)" : "var(--color-surface-2)",
+                    color: active ? "#fff" : "var(--color-white-65)",
+                    fontFamily: "var(--font-display)",
+                    fontWeight: 700,
+                    fontSize: "13px",
+                    cursor: "pointer",
+                    transition: "all 0.2s",
+                  }}
+                >
+                  {label}
+                  {count !== null && (
+                    <span
+                      style={{
+                        background: active ? "rgba(0,0,0,0.2)" : "var(--color-surface-3)",
+                        padding: "2px 8px",
+                        borderRadius: "999px",
+                        fontSize: "12px",
+                        fontWeight: 800,
+                      }}
+                    >
+                      {count.toLocaleString()}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
           {/* Search bar */}
           <form onSubmit={handleSearch}>
             <div
@@ -207,6 +282,26 @@ export default function JobsPage() {
 
               <input
                 type="text"
+                value={company}
+                onChange={(e) => setCompany(e.target.value)}
+                placeholder="Company..."
+                style={{
+                  flex: "0 0 180px",
+                  background: "var(--color-surface-2)",
+                  border: "1px solid var(--color-border)",
+                  borderRadius: "10px",
+                  padding: "11px 14px",
+                  fontSize: "14px",
+                  color: "var(--color-white)",
+                  outline: "none",
+                  transition: "border-color 0.2s",
+                }}
+                onFocus={(e) => (e.target.style.borderColor = "var(--color-orange)")}
+                onBlur={(e) => (e.target.style.borderColor = "var(--color-border)")}
+              />
+
+              <input
+                type="text"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 placeholder="Location…"
@@ -228,119 +323,36 @@ export default function JobsPage() {
               <button type="submit" className="btn-primary" style={{ flexShrink: 0 }}>
                 Search
               </button>
-
-              <button
-                type="button"
-                onClick={() => setShowFilters((f) => !f)}
-                className="btn-ghost"
-                style={{ flexShrink: 0, gap: "6px" }}
-              >
-                <FaFilter style={{ fontSize: "11px" }} />
-                Filters
-              </button>
             </div>
 
-            {/* Expanded filters */}
-            {showFilters && (
-              <div
-                style={{
-                  display: "flex",
-                  gap: "10px",
-                  flexWrap: "wrap",
-                  padding: "16px",
-                  background: "var(--color-surface-2)",
-                  border: "1px solid var(--color-border)",
-                  borderRadius: "12px",
-                  marginBottom: "16px",
-                  alignItems: "center",
-                }}
+            {/* Expanded filters — experience + sort + workType + salary + remote */}
+            <div
+              style={{
+                display: "flex",
+                gap: "10px",
+                flexWrap: "wrap",
+                marginBottom: "16px",
+                alignItems: "center",
+              }}
+            >
+              <select
+                value={workType}
+                onChange={(e) => setWorkType(e.target.value)}
+                style={{ background: "var(--color-surface-2)", border: "1px solid var(--color-border)", borderRadius: "8px", padding: "9px 14px", fontSize: "13px", color: "var(--color-white-65)", outline: "none", cursor: "pointer" }}
               >
-                {/* Experience */}
-                <select
-                  value={experience}
-                  onChange={(e) => setExperience(e.target.value)}
-                  style={{
-                    background: "var(--color-surface-3)",
-                    border: "1px solid var(--color-border)",
-                    borderRadius: "8px",
-                    padding: "9px 14px",
-                    fontSize: "13px",
-                    color: "var(--color-white-65)",
-                    outline: "none",
-                    cursor: "pointer",
-                  }}
+                <option value="">Any work type</option>
+                {WORK_TYPE_OPTIONS.filter(Boolean).map((o) => (
+                  <option key={o} value={o}>{o}</option>
+                ))}
+              </select>
+              {hasActiveFilters && (
+                <button type="button" onClick={clearFilters}
+                  style={{ display: "flex", alignItems: "center", gap: "5px", background: "none", border: "none", cursor: "pointer", color: "#f87171", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "12px" }}
                 >
-                  <option value="">Any experience</option>
-                  {EXPERIENCE_OPTIONS.filter(Boolean).map((o) => (
-                    <option key={o} value={o}>{o.charAt(0) + o.slice(1).toLowerCase()}</option>
-                  ))}
-                </select>
-
-                {/* Sort */}
-                <select
-                  value={sort}
-                  onChange={(e) => setSort(e.target.value)}
-                  style={{
-                    background: "var(--color-surface-3)",
-                    border: "1px solid var(--color-border)",
-                    borderRadius: "8px",
-                    padding: "9px 14px",
-                    fontSize: "13px",
-                    color: "var(--color-white-65)",
-                    outline: "none",
-                    cursor: "pointer",
-                  }}
-                >
-                  {SORT_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>{o.label}</option>
-                  ))}
-                </select>
-
-                {/* Remote */}
-                <label
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    fontFamily: "var(--font-display)",
-                    fontWeight: 700,
-                    fontSize: "13px",
-                    color: "var(--color-white-65)",
-                    cursor: "pointer",
-                  }}
-                >
-                  <input
-                    type="checkbox"
-                    checked={remote}
-                    onChange={(e) => setRemote(e.target.checked)}
-                    style={{ accentColor: "var(--color-orange)" }}
-                  />
-                  Remote only
-                </label>
-
-                {hasActiveFilters && (
-                  <button
-                    type="button"
-                    onClick={clearFilters}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "5px",
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                      color: "#f87171",
-                      fontFamily: "var(--font-display)",
-                      fontWeight: 700,
-                      fontSize: "12px",
-                    }}
-                  >
-                    <FaTimes style={{ fontSize: "10px" }} />
-                    Clear
-                  </button>
-                )}
-              </div>
-            )}
+                  <FaTimes style={{ fontSize: "10px" }} /> Clear
+                </button>
+              )}
+            </div>
           </form>
 
           {/* Active filter chips */}
@@ -351,6 +363,11 @@ export default function JobsPage() {
                   &ldquo;{query}&rdquo; <FaTimes style={{ fontSize: "9px" }} />
                 </span>
               )}
+              {company && (
+                <span className="filter-chip" onClick={() => setCompany("")}>
+                  Company: {company} <FaTimes style={{ fontSize: "9px" }} />
+                </span>
+              )}
               {location && (
                 <span className="filter-chip" onClick={() => setLocation("")}>
                   📍 {location} <FaTimes style={{ fontSize: "9px" }} />
@@ -359,6 +376,26 @@ export default function JobsPage() {
               {experience && (
                 <span className="filter-chip" onClick={() => setExperience("")}>
                   {experience} <FaTimes style={{ fontSize: "9px" }} />
+                </span>
+              )}
+              {employmentType && (
+                <span className="filter-chip" onClick={() => setEmploymentType("")}>
+                  {employmentType.replace("_", " ")} <FaTimes style={{ fontSize: "9px" }} />
+                </span>
+              )}
+              {workType && (
+                <span className="filter-chip" onClick={() => setWorkType("")}>
+                  {workType} <FaTimes style={{ fontSize: "9px" }} />
+                </span>
+              )}
+              {salaryMin && (
+                <span className="filter-chip" onClick={() => setSalaryMin("")}>
+                  Min: {salaryMin} <FaTimes style={{ fontSize: "9px" }} />
+                </span>
+              )}
+              {salaryMax && (
+                <span className="filter-chip" onClick={() => setSalaryMax("")}>
+                  Max: {salaryMax} <FaTimes style={{ fontSize: "9px" }} />
                 </span>
               )}
               {remote && (

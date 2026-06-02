@@ -6,11 +6,10 @@ import { useParams } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { toast } from "react-hot-toast";
 import AppHeader from "@/components/AppHeader";
-import StatusBadge from "@/components/StatusBadge";
 import { createApi, unwrap } from "@/lib/api";
 import {
   FaMapMarkerAlt, FaBriefcase, FaArrowLeft, FaExternalLinkAlt,
-  FaBookmark, FaRegBookmark, FaCheckCircle, FaChevronDown,
+  FaCalendarAlt, FaLayerGroup, FaLink, FaChevronDown, FaBookmark,
 } from "react-icons/fa";
 
 interface JobDetail {
@@ -19,40 +18,56 @@ interface JobDetail {
   company?: string;
   companyName?: string;
   location?: string;
-  remote?: boolean;
+  department?: string;
+  isRemote?: boolean;
   employmentType?: string;
-  experience?: string;
+  experienceLevel?: string;
   salaryMin?: number;
   salaryMax?: number;
   description?: string;
-  requirements?: string[];
   postedAt?: string;
+  fetchedAt?: string;
   applyUrl?: string;
+  source?: string;
   applicationId?: number;
   applicationStatus?: string;
 }
 
 const STATUS_OPTIONS = [
-  { value: "NOT_APPLIED",  label: "Not Tracked" },
-  { value: "SAVED",        label: "Saved" },
-  { value: "APPLIED",      label: "Applied" },
-  { value: "PHONE_SCREEN", label: "Phone Screen" },
-  { value: "INTERVIEW",    label: "Interview" },
-  { value: "OFFER",        label: "Offer" },
-  { value: "REJECTED",     label: "Rejected" },
+  { value: "NOT_APPLIED", label: "Not Applied" },
+  { value: "SAVED",       label: "Saved" },
+  { value: "APPLIED",     label: "Applied" },
+  { value: "INTERVIEW",   label: "Interview" },
+  { value: "OFFER",       label: "Offer" },
+  { value: "REJECTED",    label: "Rejected" },
 ];
-
-function formatSalary(min?: number, max?: number): string {
-  if (!min && !max) return "";
-  const fmt = (n: number) => `$${(n / 1000).toFixed(0)}k`;
-  if (min && max) return `${fmt(min)} – ${fmt(max)}`;
-  if (min) return `From ${fmt(min)}`;
-  return `Up to ${fmt(max!)}`;
-}
 
 function formatDate(d?: string) {
   if (!d) return "Recently";
-  return new Date(d).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+  const diff = Math.floor((Date.now() - new Date(d).getTime()) / 86400000);
+  if (diff === 0) return "Today";
+  if (diff === 1) return "Yesterday";
+  if (diff < 7) return `${diff} days ago`;
+  return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
+
+function OverviewRow({ icon, label, value }: { icon: React.ReactNode; label: string; value?: string }) {
+  if (!value) return null;
+  return (
+    <div style={{ display: "flex", alignItems: "flex-start", gap: "12px", padding: "12px 0", borderBottom: "1px solid var(--color-border)" }}>
+      <div style={{ width: "32px", height: "32px", borderRadius: "8px", background: "var(--color-surface-3)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--color-orange)", flexShrink: 0, fontSize: "13px" }}>
+        {icon}
+      </div>
+      <div>
+        <div style={{ fontFamily: "var(--font-display)", fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-white-40)", marginBottom: "2px" }}>
+          {label}
+        </div>
+        <div style={{ fontFamily: "var(--font-body)", fontSize: "14px", color: "var(--color-white-65)" }}>
+          {value}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function JobDetailPage() {
@@ -61,7 +76,7 @@ export default function JobDetailPage() {
 
   const [job, setJob] = useState<JobDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  const [status, setStatus] = useState<string | null>(null);
+  const [status, setStatus] = useState<string>("NOT_APPLIED");
   const [appId, setAppId] = useState<number | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
 
@@ -90,7 +105,8 @@ export default function JobDetailPage() {
     try {
       if (newStatus === "NOT_APPLIED") {
         if (appId) await unwrap(await api.updateApplicationStatus(appId, "WITHDRAWN"));
-        setStatus(null);
+        setStatus("NOT_APPLIED");
+        setAppId(null);
         toast.success("Removed from tracker");
       } else {
         if (!appId) {
@@ -101,11 +117,10 @@ export default function JobDetailPage() {
           await unwrap(await api.updateApplicationStatus(appId, newStatus));
         }
         setStatus(newStatus);
-        toast.success(`Status → ${newStatus.replace(/_/g, " ").toLowerCase()}`);
+        toast.success(`Status updated`);
       }
-    } catch (err) {
+    } catch {
       toast.error("Failed to update");
-      console.error(err);
     } finally {
       setActionLoading(false);
     }
@@ -116,11 +131,11 @@ export default function JobDetailPage() {
   if (loading) {
     return (
       <>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         <AppHeader />
-        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh" }}>
+        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <div style={{ width: "40px", height: "40px", borderRadius: "50%", border: "3px solid var(--color-border)", borderTopColor: "var(--color-orange)", animation: "spin 0.7s linear infinite" }} />
         </div>
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </>
     );
   }
@@ -131,10 +146,8 @@ export default function JobDetailPage() {
         <AppHeader />
         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "80px 24px" }}>
           <div style={{ textAlign: "center" }}>
-            <p style={{ fontSize: "48px", marginBottom: "16px" }}>😕</p>
-            <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "24px", color: "var(--color-white)", margin: "0 0 12px" }}>
-              Job not found
-            </h2>
+            <p style={{ fontSize: "48px" }}>😕</p>
+            <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "24px", color: "var(--color-white)", margin: "0 0 12px" }}>Job not found</h2>
             <Link className="btn-ghost" href="/jobs">← Back to Jobs</Link>
           </div>
         </div>
@@ -147,19 +160,7 @@ export default function JobDetailPage() {
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       <AppHeader
         left={
-          <Link
-            href="/jobs"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              fontFamily: "var(--font-display)",
-              fontWeight: 700,
-              fontSize: "13px",
-              color: "var(--color-white-65)",
-              textDecoration: "none",
-              transition: "color 0.2s",
-            }}
+          <Link href="/jobs" style={{ display: "flex", alignItems: "center", gap: "8px", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "13px", color: "var(--color-white-65)", textDecoration: "none" }}
             onMouseEnter={(e) => (e.currentTarget.style.color = "var(--color-white)")}
             onMouseLeave={(e) => (e.currentTarget.style.color = "var(--color-white-65)")}
           >
@@ -169,231 +170,123 @@ export default function JobDetailPage() {
       />
 
       <div style={{ flex: 1, overflowY: "auto" }}>
-        <div style={{ maxWidth: "900px", margin: "0 auto", padding: "32px", boxSizing: "border-box" }}>
+        <div style={{ maxWidth: "1000px", margin: "0 auto", padding: "32px", boxSizing: "border-box" }}>
 
-          {/* Header card */}
-          <div
-            style={{
-              background: "var(--color-surface-2)",
-              border: "1px solid var(--color-border)",
-              borderRadius: "16px",
-              padding: "28px",
-              marginBottom: "20px",
-            }}
-          >
+          {/* ── Header card ── */}
+          <div style={{ background: "var(--color-surface-2)", border: "1px solid var(--color-border)", borderRadius: "16px", padding: "24px 28px", marginBottom: "20px" }}>
             <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "16px", flexWrap: "wrap" }}>
-              {/* Company logo placeholder */}
-              <div
-                style={{
-                  width: "52px",
-                  height: "52px",
-                  borderRadius: "14px",
-                  background: "var(--color-surface-3)",
-                  border: "1px solid var(--color-border)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontFamily: "var(--font-display)",
-                  fontWeight: 700,
-                  fontSize: "22px",
-                  color: "var(--color-orange)",
-                  flexShrink: 0,
-                }}
-              >
-                {companyLabel.charAt(0).toUpperCase()}
+              {/* Logo + title */}
+              <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+                <div style={{ width: "52px", height: "52px", borderRadius: "14px", background: "var(--color-surface-3)", border: "1px solid var(--color-border)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "22px", color: "var(--color-orange)", flexShrink: 0 }}>
+                  {companyLabel.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "clamp(18px, 2.5vw, 24px)", letterSpacing: "-0.025em", color: "var(--color-white)", margin: "0 0 4px" }}>
+                    {job.title}
+                  </h1>
+                  <p style={{ fontFamily: "var(--font-body)", fontSize: "14px", color: "var(--color-orange)", fontWeight: 500, margin: 0 }}>
+                    {companyLabel}
+                  </p>
+                </div>
               </div>
 
-              {/* Status + salary */}
+              {/* Action buttons */}
               <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
-                {status && <StatusBadge status={status} />}
-                {formatSalary(job.salaryMin, job.salaryMax) && (
-                  <span
-                    style={{
-                      fontFamily: "var(--font-mono)",
-                      fontSize: "12px",
-                      color: "#4ade80",
-                      background: "rgba(34,197,94,0.1)",
-                      border: "1px solid rgba(34,197,94,0.2)",
-                      padding: "3px 10px",
-                      borderRadius: "999px",
-                    }}
+                <button style={{ display: "flex", alignItems: "center", gap: "6px", background: "var(--color-surface-3)", border: "1px solid var(--color-border)", borderRadius: "10px", padding: "10px 16px", color: "var(--color-white-65)", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "13px", cursor: "pointer" }}>
+                  <FaBookmark style={{ fontSize: "11px" }} /> Save Job
+                </button>
+
+                {/* Status dropdown */}
+                <div style={{ position: "relative" }}>
+                  <select
+                    value={status}
+                    disabled={actionLoading}
+                    onChange={handleStatusChange}
+                    style={{ appearance: "none", background: "var(--color-surface-3)", border: "1px solid var(--color-border)", borderRadius: "10px", padding: "10px 36px 10px 16px", color: "var(--color-white-65)", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "13px", cursor: "pointer", outline: "none", opacity: actionLoading ? 0.5 : 1 }}
                   >
-                    {formatSalary(job.salaryMin, job.salaryMax)}
-                  </span>
+                    {STATUS_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
+                  <FaChevronDown style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", pointerEvents: "none", fontSize: "10px", color: "var(--color-white-40)" }} />
+                </div>
+
+                {job.applyUrl && (
+                  <a href={job.applyUrl} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ gap: "8px", textDecoration: "none" }}>
+                    Apply on Site <FaExternalLinkAlt style={{ fontSize: "11px" }} />
+                  </a>
                 )}
               </div>
             </div>
 
-            <h1
-              style={{
-                fontFamily: "var(--font-display)",
-                fontWeight: 800,
-                fontSize: "clamp(22px, 3vw, 30px)",
-                letterSpacing: "-0.025em",
-                color: "var(--color-white)",
-                margin: "16px 0 6px",
-              }}
-            >
-              {job.title}
-            </h1>
-            <p style={{ fontFamily: "var(--font-body)", fontSize: "15px", color: "var(--color-orange)", fontWeight: 500, margin: "0 0 16px" }}>
-              {companyLabel}
-            </p>
-
             {/* Meta tags */}
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", marginBottom: "20px" }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "16px" }}>
               {job.location && (
-                <span style={{ display: "flex", alignItems: "center", gap: "6px", fontFamily: "var(--font-body)", fontSize: "13px", color: "var(--color-white-65)" }}>
-                  <FaMapMarkerAlt style={{ color: "var(--color-white-40)" }} />
-                  {job.location}
-                  {job.remote && " (Remote)"}
+                <span style={{ display: "flex", alignItems: "center", gap: "5px", fontFamily: "var(--font-body)", fontSize: "12px", color: "var(--color-white-65)", background: "var(--color-surface-3)", border: "1px solid var(--color-border)", padding: "4px 10px", borderRadius: "999px" }}>
+                  <FaMapMarkerAlt style={{ fontSize: "10px", color: "var(--color-white-40)" }} /> {job.location}
                 </span>
               )}
               {job.employmentType && (
-                <span style={{ display: "flex", alignItems: "center", gap: "6px", fontFamily: "var(--font-body)", fontSize: "13px", color: "var(--color-white-65)" }}>
-                  <FaBriefcase style={{ color: "var(--color-white-40)" }} />
-                  {job.employmentType}
+                <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "11px", background: "var(--color-surface-3)", border: "1px solid var(--color-border)", padding: "4px 10px", borderRadius: "999px", color: "var(--color-white-65)", letterSpacing: "0.04em" }}>
+                  {job.employmentType.replace(/_/g, " ")}
                 </span>
               )}
-              {job.experience && (
-                <span
-                  style={{
-                    fontFamily: "var(--font-display)",
-                    fontWeight: 700,
-                    fontSize: "11px",
-                    background: "var(--color-surface-3)",
-                    border: "1px solid var(--color-border)",
-                    padding: "3px 10px",
-                    borderRadius: "999px",
-                    color: "var(--color-white-65)",
-                  }}
-                >
-                  {job.experience}
+              {job.source && (
+                <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "11px", background: "var(--color-surface-3)", border: "1px solid var(--color-border)", padding: "4px 10px", borderRadius: "999px", color: "var(--color-white-65)", letterSpacing: "0.04em" }}>
+                  {job.source}
+                </span>
+              )}
+              {job.postedAt && (
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--color-white-40)", background: "var(--color-surface-3)", border: "1px solid var(--color-border)", padding: "4px 10px", borderRadius: "999px", letterSpacing: "0.04em" }}>
+                  {formatDate(job.postedAt).toUpperCase()}
                 </span>
               )}
             </div>
+          </div>
 
-            {/* Posted date */}
-            <p style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--color-white-40)", letterSpacing: "0.08em", marginBottom: "20px" }}>
-              Posted {formatDate(job.postedAt)}
-            </p>
+          {/* ── Two-column body ── */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: "20px", alignItems: "start" }}>
 
-            {/* Action buttons */}
-            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+            {/* Left — description */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+              <div style={{ background: "var(--color-surface-2)", border: "1px solid var(--color-border)", borderRadius: "16px", padding: "28px" }}>
+                <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "17px", color: "var(--color-white)", margin: "0 0 16px", letterSpacing: "-0.02em" }}>
+                  Job Description
+                </h2>
+                {job.description ? (
+                  <div style={{ fontFamily: "var(--font-body)", fontSize: "14px", color: "var(--color-white-65)", lineHeight: "1.8", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+                    {job.description}
+                  </div>
+                ) : (
+                  <p style={{ fontFamily: "var(--font-body)", fontSize: "14px", color: "var(--color-white-40)", fontStyle: "italic" }}>
+                    No description available for this job.
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Right — overview sidebar */}
+            <div style={{ background: "var(--color-surface-2)", border: "1px solid var(--color-border)", borderRadius: "16px", padding: "24px" }}>
+              <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "17px", color: "var(--color-white)", margin: "0 0 4px", letterSpacing: "-0.02em" }}>
+                Job Overview
+              </h2>
+              <div style={{ borderTop: "1px solid var(--color-border)", marginTop: "8px" }}>
+                <OverviewRow icon={<FaCalendarAlt />} label="Posted" value={formatDate(job.postedAt)} />
+                <OverviewRow icon={<FaBriefcase />} label="Job Type" value={job.employmentType?.replace(/_/g, " ")} />
+                <OverviewRow icon={<FaMapMarkerAlt />} label="Location" value={job.location ?? (job.isRemote ? "Remote" : undefined)} />
+                <OverviewRow icon={<FaLayerGroup />} label="Department" value={job.department} />
+                <OverviewRow icon={<FaLayerGroup />} label="Experience" value={job.experienceLevel} />
+                <OverviewRow icon={<FaLink />} label="Source" value={job.source} />
+              </div>
+
               {job.applyUrl && (
-                <a
-                  href={job.applyUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-primary"
-                  style={{ gap: "8px" }}
+                <a href={job.applyUrl} target="_blank" rel="noopener noreferrer" className="btn-primary"
+                  style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", textDecoration: "none", marginTop: "20px", width: "100%", boxSizing: "border-box" }}
                 >
                   Apply Now <FaExternalLinkAlt style={{ fontSize: "11px" }} />
                 </a>
               )}
-
-              {/* Status dropdown */}
-              <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
-                <select
-                  value={status ?? "NOT_APPLIED"}
-                  disabled={actionLoading}
-                  onChange={handleStatusChange}
-                  style={{
-                    appearance: "none",
-                    background: "var(--color-surface-3)",
-                    border: "1px solid var(--color-border)",
-                    borderRadius: "10px",
-                    padding: "11px 36px 11px 16px",
-                    color: "var(--color-white-65)",
-                    fontFamily: "var(--font-display)",
-                    fontWeight: 700,
-                    fontSize: "13px",
-                    cursor: "pointer",
-                    outline: "none",
-                    opacity: actionLoading ? 0.5 : 1,
-                  }}
-                >
-                  {STATUS_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>{o.label}</option>
-                  ))}
-                </select>
-                <FaChevronDown style={{ position: "absolute", right: "14px", pointerEvents: "none", fontSize: "10px", color: "var(--color-white-40)" }} />
-              </div>
             </div>
           </div>
 
-          {/* Description card */}
-          {job.description && (
-            <div
-              style={{
-                background: "var(--color-surface-2)",
-                border: "1px solid var(--color-border)",
-                borderRadius: "16px",
-                padding: "28px",
-                marginBottom: "20px",
-              }}
-            >
-              <h2
-                style={{
-                  fontFamily: "var(--font-display)",
-                  fontWeight: 700,
-                  fontSize: "18px",
-                  color: "var(--color-white)",
-                  margin: "0 0 16px",
-                  letterSpacing: "-0.02em",
-                }}
-              >
-                Job Description
-              </h2>
-              <div
-                style={{
-                  fontFamily: "var(--font-body)",
-                  fontSize: "14px",
-                  color: "var(--color-white-65)",
-                  lineHeight: "1.8",
-                  whiteSpace: "pre-wrap",
-                  wordBreak: "break-word",
-                }}
-              >
-                {job.description}
-              </div>
-            </div>
-          )}
-
-          {/* Requirements */}
-          {job.requirements && job.requirements.length > 0 && (
-            <div
-              style={{
-                background: "var(--color-surface-2)",
-                border: "1px solid var(--color-border)",
-                borderRadius: "16px",
-                padding: "28px",
-              }}
-            >
-              <h2
-                style={{
-                  fontFamily: "var(--font-display)",
-                  fontWeight: 700,
-                  fontSize: "18px",
-                  color: "var(--color-white)",
-                  margin: "0 0 16px",
-                  letterSpacing: "-0.02em",
-                }}
-              >
-                Requirements
-              </h2>
-              <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "8px" }}>
-                {job.requirements.map((req, i) => (
-                  <li key={i} style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
-                    <FaCheckCircle style={{ fontSize: "12px", color: "var(--color-orange)", marginTop: "3px", flexShrink: 0 }} />
-                    <span style={{ fontFamily: "var(--font-body)", fontSize: "14px", color: "var(--color-white-65)", lineHeight: 1.6 }}>
-                      {req}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
         </div>
       </div>
     </>

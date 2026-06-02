@@ -31,6 +31,14 @@ interface Preferences {
   alertFrequency?: string;
 }
 
+interface PreferencesApiResponse {
+  titles?: string[];
+  skills?: string[];
+  roles?: string[];
+  companies?: string[];
+  emailEnabled?: boolean;
+}
+
 const labelStyle: React.CSSProperties = {
   fontFamily: "var(--font-display)",
   fontWeight: 700,
@@ -77,8 +85,16 @@ export default function PreferencesPage() {
     const api = createApi(() => getToken());
     (async () => {
       try {
-        const data = await unwrap<Preferences>(await api.getPreferences());
-        if (data) setPrefs((p) => ({ ...p, ...data }));
+        const data = await unwrap<PreferencesApiResponse>(await api.getPreferences());
+        if (data) {
+          setPrefs((p) => ({
+            ...p,
+            jobTitles: data.titles ?? [],
+            skills: data.skills ?? [],
+            roleTypes: data.roles ?? [],
+            emailEnabled: data.emailEnabled ?? p.emailEnabled,
+          }));
+        }
       } catch { /* user may not have prefs yet */ }
       finally { setLoading(false); }
     })();
@@ -88,7 +104,12 @@ export default function PreferencesPage() {
     const api = createApi(() => getToken());
     setSaving(true);
     try {
-      await unwrap(await api.updatePreferences(prefs as Record<string, unknown>));
+      await unwrap(await api.updatePreferences({
+        titles: prefs.jobTitles ?? [],
+        skills: prefs.skills ?? [],
+        roles: prefs.roleTypes ?? [],
+        emailEnabled: prefs.emailEnabled ?? true,
+      }));
       toast.success("Preferences saved!");
     } catch {
       toast.error("Failed to save preferences");
@@ -238,47 +259,25 @@ export default function PreferencesPage() {
             )}
           </SectionCard>
 
-          {/* Location + Experience */}
-          <SectionCard title="Work Style & Experience">
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
-              <div>
-                <span style={labelStyle}>Preferred Locations</span>
-                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                  {LOCATION_PREFS.map((loc) => (
-                    <label key={loc} style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }}>
-                      <input
-                        type="checkbox"
-                        checked={(prefs.locations ?? []).includes(loc)}
-                        onChange={() => toggleLocation(loc)}
-                        style={{ accentColor: "var(--color-orange)", width: "16px", height: "16px" }}
-                      />
-                      <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "13px", color: "var(--color-white-65)" }}>
-                        {loc}
-                      </span>
-                    </label>
-                  ))}
-                </div>
+          {/* Location only — experience level removed */}
+          <SectionCard title="Work Style">
+            <div>
+              <span style={labelStyle}>Preferred Locations</span>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "16px" }}>
+                {LOCATION_PREFS.map((loc) => (
+                  <label key={loc} style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }}>
+                    <input
+                      type="checkbox"
+                      checked={(prefs.locations ?? []).includes(loc)}
+                      onChange={() => toggleLocation(loc)}
+                      style={{ accentColor: "var(--color-orange)", width: "16px", height: "16px" }}
+                    />
+                    <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "13px", color: "var(--color-white-65)" }}>
+                      {loc}
+                    </span>
+                  </label>
+                ))}
               </div>
-              <div>
-                <span style={labelStyle}>Experience Level</span>
-                <div style={{ position: "relative" }}>
-                  <select
-                    value={prefs.experienceLevel ?? ""}
-                    onChange={(e) => setPrefs((p) => ({ ...p, experienceLevel: e.target.value }))}
-                    style={{ ...inputStyle, cursor: "pointer" }}
-                    onFocus={(e) => (e.target.style.borderColor = "var(--color-orange)")}
-                    onBlur={(e) => (e.target.style.borderColor = "var(--color-border)")}
-                  >
-                    <option value="">Any level</option>
-                    {EXPERIENCE_OPTIONS.map((o) => (
-                      <option key={o} value={o}>{o.charAt(0) + o.slice(1).toLowerCase()}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <div style={{ marginTop: "16px" }}>
               <label style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }}>
                 <input
                   type="checkbox"

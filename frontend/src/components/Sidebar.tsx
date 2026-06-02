@@ -18,11 +18,13 @@ import {
   FaChartBar,
   FaSlidersH,
   FaHeartbeat,
+  FaHeart,
 } from "react-icons/fa";
 
 const NAV_ITEMS = [
   { label: "Dashboard",   path: "/dashboard",    icon: <FaTh /> },
   { label: "Browse Jobs", path: "/jobs",          icon: <FaSearch /> },
+  { label: "For You",     path: "/for-you",       icon: <FaHeart /> },
   { label: "Applications",path: "/applications",  icon: <FaPaperPlane /> },
   { label: "Saved Jobs",  path: "/saved",         icon: <FaBookmark /> },
   { label: "Preferences", path: "/preferences",   icon: <FaSlidersH /> },

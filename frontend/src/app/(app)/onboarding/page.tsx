@@ -82,9 +82,9 @@ export default function OnboardingPage() {
     setSaving(true);
     try {
       await unwrap(await api.updatePreferences({
-        jobTitles,
+        titles: jobTitles,
         skills,
-        roleTypes,
+        roles: roleTypes,
         emailEnabled: true,
       }));
       toast.success("You're all set! Welcome to CareerForge.");

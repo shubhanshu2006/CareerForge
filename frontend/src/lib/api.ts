@@ -57,6 +57,8 @@ export function createApi(getToken: () => Promise<string | null>) {
       return req(`/api/v1/jobs/search${q ? `?${q}` : ""}`, { method: "GET" });
     },
 
+    getJobCounts: () => req("/api/v1/jobs/counts", { method: "GET" }),
+
     getJob: (id: number | string) =>
       req(`/api/v1/jobs/${id}`, { method: "GET" }),
 
@@ -110,10 +112,10 @@ export function createApi(getToken: () => Promise<string | null>) {
         body: JSON.stringify(data),
       }),
 
-    updateSocialLinks: (links: Record<string, string>) =>
+    updateSocialLinks: (payload: { links: Array<{ platform: string; url: string }> }) =>
       req("/api/v1/profile/social-links", {
         method: "PUT",
-        body: JSON.stringify({ links }),
+        body: JSON.stringify(payload),
       }),
 
     addSkill: (skill: string) =>

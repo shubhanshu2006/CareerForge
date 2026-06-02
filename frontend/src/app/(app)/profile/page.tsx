@@ -16,6 +16,16 @@ interface Profile {
   socialLinks?: { github?: string; linkedin?: string; website?: string; twitter?: string };
 }
 
+interface ProfileApiResponse {
+  profile?: {
+    name?: string | null;
+    yearsOfExperience?: number | null;
+    currentLocation?: string | null;
+  };
+  socialLinks?: Array<{ platform: string; url: string }>;
+  skills?: string[];
+}
+
 const SUGGESTED_SKILLS = [
   "JavaScript", "TypeScript", "Python", "React", "Node.js",
   "AWS", "Docker", "SQL", "Git", "Go", "Java", "C++",
@@ -54,12 +64,29 @@ export default function ProfilePage() {
     const api = createApi(() => getToken());
     (async () => {
       try {
-        const data = await unwrap<Profile>(await api.getProfile());
-        if (data) setProfile((p) => ({
-          ...p, ...data,
-          socialLinks: { ...p.socialLinks, ...(data.socialLinks ?? {}) },
-          skills: data.skills ?? [],
-        }));
+        const data = await unwrap<ProfileApiResponse>(await api.getProfile());
+        if (data) {
+          const fullName = (data.profile?.name ?? "").trim();
+          const [firstName = "", ...rest] = fullName.split(/\s+/);
+          const lastName = rest.join(" ");
+          const links = Object.fromEntries(
+            (data.socialLinks ?? []).map((item) => [item.platform.toLowerCase(), item.url]),
+          ) as Record<string, string>;
+
+          setProfile((p) => ({
+            ...p,
+            firstName,
+            lastName,
+            socialLinks: {
+              ...p.socialLinks,
+              github: links.github ?? p.socialLinks?.github ?? "",
+              linkedin: links.linkedin ?? p.socialLinks?.linkedin ?? "",
+              website: links.portfolio ?? p.socialLinks?.website ?? "",
+              twitter: links.x ?? p.socialLinks?.twitter ?? "",
+            },
+            skills: data.skills ?? [],
+          }));
+        }
       } catch { /* first time user */ }
       finally { setLoading(false); }
     })();
@@ -69,7 +96,12 @@ export default function ProfilePage() {
     const api = createApi(() => getToken());
     setSaving(true);
     try {
-      await unwrap(await api.updateProfile(profile as Record<string, unknown>));
+      const name = `${profile.firstName ?? ""} ${profile.lastName ?? ""}`.trim();
+      if (!name) {
+        toast.error("Please add first or last name before saving.");
+        return;
+      }
+      await unwrap(await api.updateProfile({ name }));
       toast.success("Profile saved!");
     } catch { toast.error("Failed to save profile"); }
     finally { setSaving(false); }
@@ -79,7 +111,15 @@ export default function ProfilePage() {
     const api = createApi(() => getToken());
     setSavingLinks(true);
     try {
-      await unwrap(await api.updateSocialLinks(profile.socialLinks as Record<string, string> ?? {}));
+      const raw = profile.socialLinks ?? {};
+      const links = [
+        raw.github ? { platform: "GITHUB", url: raw.github.trim() } : null,
+        raw.linkedin ? { platform: "LINKEDIN", url: raw.linkedin.trim() } : null,
+        raw.website ? { platform: "PORTFOLIO", url: raw.website.trim() } : null,
+        raw.twitter ? { platform: "X", url: raw.twitter.trim() } : null,
+      ].filter((item): item is { platform: string; url: string } => Boolean(item && item.url));
+
+      await unwrap(await api.updateSocialLinks({ links }));
       toast.success("Social links saved!");
     } catch { toast.error("Failed to save links"); }
     finally { setSavingLinks(false); }
