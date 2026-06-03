@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, lazy, useState } from "react";
+import { Suspense, lazy, useState, useEffect } from "react";
 
 const SCENE_URL =
   "https://prod.spline.design/xNV9ygjcVERzejEQ/scene.splinecode";
@@ -18,6 +18,16 @@ const T = {
 
 export default function SplineHero() {
   const [loaded, setLoaded] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 960px)");
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
   return (
     <div
       style={{
@@ -30,44 +40,58 @@ export default function SplineHero() {
         overflow: "hidden",
       }}
     >
-      {/* Force internal canvas to stretch fully */}
-      <style>{`
-        #spline-canvas canvas,
-        #spline-canvas > div,
-        #spline-canvas > div > canvas {
-          width: 100% !important;
-          height: 100% !important;
-          display: block !important;
-        }
-      `}</style>
-
-      {!loaded && (
+      {isMobile ? (
+        /* Static gradient — no Spline loaded on mobile */
         <div
           style={{
             position: "absolute",
             inset: 0,
             background:
-              "radial-gradient(ellipse 80% 60% at 60% 40%, rgba(249,115,22,0.12) 0%, #060608 70%)",
-            animation: "lpSpinePulse 2s ease-in-out infinite alternate",
+              "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(249,115,22,0.10) 0%, #060608 70%)",
           }}
         />
+      ) : (
+        <>
+          {/* Force internal canvas to stretch fully */}
+          <style>{`
+            #spline-canvas canvas,
+            #spline-canvas > div,
+            #spline-canvas > div > canvas {
+              width: 100% !important;
+              height: 100% !important;
+              display: block !important;
+            }
+          `}</style>
+
+          {!loaded && (
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                background:
+                  "radial-gradient(ellipse 80% 60% at 60% 40%, rgba(249,115,22,0.12) 0%, #060608 70%)",
+                animation: "lpSpinePulse 2s ease-in-out infinite alternate",
+              }}
+            />
+          )}
+          <Suspense fallback={null}>
+            <div id="spline-canvas" style={{ width: "100%", height: "100%" }}>
+              <Spline
+                scene={SCENE_URL}
+                onLoad={() => setLoaded(true)}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  opacity: loaded ? 1 : 0,
+                  transition: "opacity 0.8s ease",
+                  pointerEvents: loaded ? "auto" : "none",
+                  display: "block",
+                }}
+              />
+            </div>
+          </Suspense>
+        </>
       )}
-      <Suspense fallback={null}>
-        <div id="spline-canvas" style={{ width: "100%", height: "100%" }}>
-          <Spline
-            scene={SCENE_URL}
-            onLoad={() => setLoaded(true)}
-            style={{
-              width: "100%",
-              height: "100%",
-              opacity: loaded ? 1 : 0,
-              transition: "opacity 0.8s ease",
-              pointerEvents: loaded ? "auto" : "none",
-              display: "block",
-            }}
-          />
-        </div>
-      </Suspense>
 
       {/* Subtle dark overlay for text legibility */}
       <div
