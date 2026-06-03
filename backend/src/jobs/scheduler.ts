@@ -21,15 +21,25 @@ export const startScheduler = async (): Promise<void> => {
       {
         repeat: {
           every: REPEAT_EVERY_MS,
-          immediately: true, // also run once right after server starts
         },
         removeOnComplete: { count: 10 },
         removeOnFail: { count: 50 },
       },
     );
 
+    // Enqueue a one-off job so ingestion runs immediately on startup,
+    // without waiting for the first repeatable interval.
+    await jobIngestionQueue.add(
+      "startup-ingestion",
+      { type: "all" },
+      {
+        removeOnComplete: true,
+        removeOnFail: { count: 10 },
+      },
+    );
+
     console.log(
-      `[Scheduler] Job ingestion scheduled — runs every ${REPEAT_EVERY_MS / 3_600_000} hour(s)`,
+      `[Scheduler] Job ingestion scheduled — runs every ${REPEAT_EVERY_MS / 3_600_000} hour(s), startup run enqueued`,
     );
   } catch (err) {
     console.error("[Scheduler] Failed to start scheduler:", err);
