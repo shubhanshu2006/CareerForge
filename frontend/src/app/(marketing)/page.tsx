@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Route } from "next";
 import type { Metadata } from "next";
 import SplineHero from "@/components/SplineHero";
+import ScrollReveal from "@/components/ScrollReveal";
 
 export const metadata: Metadata = {
   title: "CareerForge — Discover Jobs Before Everyone Else",
@@ -57,6 +58,7 @@ const MARQUEE_ITEMS = [
 export default function LandingPage() {
   return (
     <div style={{ minHeight: "100vh" }}>
+      <ScrollReveal />
       <style>{`
         /* ── Layout grids ── */
         .hero-grid {
@@ -205,11 +207,17 @@ export default function LandingPage() {
           .flow-grid { grid-template-columns: repeat(2, 1fr) !important; }
           .section { padding: 80px 20px !important; }
           .hero-grid h1 { font-size: 40px !important; }
+          .landing-header { padding: 16px 20px !important; }
+          .landing-logo { font-size: 17px !important; }
+          .landing-nav { gap: 6px !important; }
+          .landing-nav .btn-ghost { font-size: 12px !important; padding: 8px 10px !important; }
+          .landing-nav .btn-primary { font-size: 12px !important; padding: 8px 14px !important; }
         }
       `}</style>
 
       {/* ── HEADER ─────────────────────────────────────────────── */}
       <header
+        className="landing-header"
         style={{
           position: "fixed",
           top: 0,
@@ -217,6 +225,8 @@ export default function LandingPage() {
           right: 0,
           zIndex: 50,
           background: "transparent",
+          boxSizing: "border-box",
+          width: "100%",
         }}
       >
         <div
@@ -226,9 +236,11 @@ export default function LandingPage() {
             alignItems: "center",
             justifyContent: "space-between",
             padding: "20px 40px",
+            boxSizing: "border-box",
           }}
         >
           <Link
+            className="landing-logo"
             href="/"
             style={{
               fontFamily: "var(--font-body)",
@@ -237,11 +249,12 @@ export default function LandingPage() {
               letterSpacing: "-0.02em",
               color: "var(--color-white)",
               textDecoration: "none",
+              flexShrink: 0,
             }}
           >
             Career<span style={{ color: "var(--color-orange)" }}>Forge</span>
           </Link>
-          <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+          <div className="landing-nav" style={{ display: "flex", gap: "10px", alignItems: "center" }}>
             <Link
               className="btn-ghost"
               href={"/login" as Route}
@@ -472,8 +485,9 @@ export default function LandingPage() {
       {/* ── PROBLEM ───────────────────────────────────────────── */}
       <section className="section" id="problem">
         <div className="section-inner">
-          <span className="section-label">The Problem</span>
+          <span className="section-label reveal">The Problem</span>
           <h2
+            className="reveal"
             style={{
               fontFamily: "var(--font-body)",
               fontWeight: 900,
@@ -487,6 +501,7 @@ export default function LandingPage() {
             <span style={{ color: "#f87171" }}>already too late.</span>
           </h2>
           <p
+            className="reveal"
             style={{
               color: "var(--color-white-65)",
               fontSize: "20px",
@@ -500,16 +515,17 @@ export default function LandingPage() {
             hundreds of candidates have already applied.
           </p>
 
-          <div className="timeline-grid" style = {{fontSize: "54px"}}>
+          <div className="timeline-grid" style={{ fontSize: "54px" }}>
             {[
               { label: "Job Posted", bad: false },
               { label: "Indexed Days Later", bad: true },
               { label: "Hundreds Apply", bad: true },
               { label: "You Apply", bad: true },
-            ].map((s) => (
+            ].map((s, i) => (
               <div
                 key={s.label}
-                className={`timeline-step${s.bad ? " bad" : ""}`}
+                className={`timeline-step reveal${s.bad ? " bad" : ""}`}
+                style={{ "--reveal-delay": i * 80 } as React.CSSProperties}
               >
                 {s.bad && (
                   <div style={{ fontSize: "18px", marginBottom: "8px" }}>
@@ -535,8 +551,9 @@ export default function LandingPage() {
         style={{ background: "rgba(249,115,22,0.02)" }}
       >
         <div className="section-inner">
-          <span className="section-label">The Solution</span>
+          <span className="section-label reveal">The Solution</span>
           <h2
+            className="reveal"
             style={{
               fontFamily: "var(--font-body)",
               fontWeight: 900,
@@ -552,6 +569,7 @@ export default function LandingPage() {
             </span>
           </h2>
           <p
+            className="reveal"
             style={{
               color: "var(--color-white-65)",
               fontSize: "20px",
@@ -572,10 +590,11 @@ export default function LandingPage() {
               { label: "Matches Your Preferences", good: true },
               { label: "Instant Alert", good: true },
               { label: "Early Application", good: true },
-            ].map((s) => (
+            ].map((s, i) => (
               <div
                 key={s.label}
-                className={`flow-pill${s.good ? " good" : ""}`}
+                className={`flow-pill reveal${s.good ? " good" : ""}`}
+                style={{ "--reveal-delay": i * 70 } as React.CSSProperties}
               >
                 {s.label}
               </div>
@@ -587,8 +606,9 @@ export default function LandingPage() {
       {/* ── USP ───────────────────────────────────────────────── */}
       <section className="section" id="usp">
         <div className="section-inner">
-          <span className="section-label">Why CareerForge</span>
+          <span className="section-label reveal">Why CareerForge</span>
           <h2
+            className="reveal"
             style={{
               fontFamily: "var(--font-body)",
               fontWeight: 900,
@@ -601,6 +621,7 @@ export default function LandingPage() {
             Minutes matter.
           </h2>
           <p
+            className="reveal"
             style={{
               color: "var(--color-white-65)",
               fontSize: "20px",
@@ -611,8 +632,12 @@ export default function LandingPage() {
           </p>
 
           <div className="usp-grid">
-            {USP_CARDS.map((c) => (
-              <div key={c.title} className="cf-card">
+            {USP_CARDS.map((c, i) => (
+              <div
+                key={c.title}
+                className="cf-card reveal"
+                style={{ "--reveal-delay": i * 100 } as React.CSSProperties}
+              >
                 <div style={{ fontSize: "28px", marginBottom: "14px" }}>
                   {c.icon}
                 </div>
@@ -646,7 +671,7 @@ export default function LandingPage() {
       {/* ── HOW IT WORKS ──────────────────────────────────────── */}
       <section className="section" id="how-it-works">
         <div className="section-inner howto-grid">
-          <div>
+          <div className="reveal-left">
             <span className="section-label">How It Works</span>
             <h2
               style={{
@@ -673,7 +698,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="cf-card" style={{ display: "grid", gap: "14px" }}>
+          <div className="cf-card reveal-right" style={{ display: "grid", gap: "14px" }}>
             {STEPS.map((step, i) => (
               <div
                 key={step}
@@ -715,6 +740,7 @@ export default function LandingPage() {
       <section className="section" id="cta">
         <div className="section-inner">
           <div
+            className="reveal-scale"
             style={{
               textAlign: "center",
               padding: "64px 32px",

@@ -70,6 +70,7 @@ export default function DashboardPage() {
           .dash-grid-4 { grid-template-columns: 1fr 1fr !important; }
           .dash-bottom { flex-direction: column !important; }
           .dash-saved-panel { width: 100% !important; }
+          .dash-activity-panel { width: 100% !important; flex: none !important; }
           .activity-table th:nth-child(2), .activity-table td:nth-child(2),
           .activity-table th:nth-child(4), .activity-table td:nth-child(4) { display: none !important; }
         }
@@ -122,6 +123,7 @@ export default function DashboardPage() {
 
             {/* Recent Activity table */}
             <div
+              className="dash-activity-panel"
               style={{
                 flex: 1,
                 background: "var(--color-surface-2)",
