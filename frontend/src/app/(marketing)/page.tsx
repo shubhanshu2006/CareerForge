@@ -207,7 +207,7 @@ export default function LandingPage() {
           .flow-grid { grid-template-columns: repeat(2, 1fr) !important; }
           .section { padding: 80px 20px !important; }
           .hero-grid h1 { font-size: 40px !important; }
-          .landing-header { padding: 16px 20px !important; }
+          .landing-header { padding: 14px 20px !important; }
           .landing-logo { font-size: 17px !important; }
           .landing-nav { gap: 6px !important; }
           .landing-nav .btn-ghost { font-size: 12px !important; padding: 8px 10px !important; }
@@ -227,18 +227,12 @@ export default function LandingPage() {
           background: "transparent",
           boxSizing: "border-box",
           width: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "20px 40px",
         }}
       >
-        <div
-          style={{
-            width: "100%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "20px 40px",
-            boxSizing: "border-box",
-          }}
-        >
           <Link
             className="landing-logo"
             href="/"
@@ -254,7 +248,7 @@ export default function LandingPage() {
           >
             Career<span style={{ color: "var(--color-orange)" }}>Forge</span>
           </Link>
-          <div className="landing-nav" style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+          <div className="landing-nav" style={{ display: "flex", gap: "10px", alignItems: "center", flexShrink: 0 }}>
             <Link
               className="btn-ghost"
               href={"/login" as Route}
@@ -278,7 +272,6 @@ export default function LandingPage() {
               Start free
             </Link>
           </div>
-        </div>
       </header>
 
       {/* ── HERO ─────────────────────────────────────────────── */}
