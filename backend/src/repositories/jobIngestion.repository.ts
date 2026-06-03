@@ -52,3 +52,31 @@ export const createJob = async (input: NormalizedJobInput) =>
       externalId: input.externalId ?? null,
     },
   });
+
+/**
+ * Bulk-insert a batch of jobs and return the created records with their IDs.
+ * Uses createManyAndReturn so we get back the auto-generated IDs for matching.
+ * skipDuplicates handles race-condition conflicts on dedupeKey / externalId.
+ */
+export const createJobsBulk = async (inputs: NormalizedJobInput[]) =>
+  prisma.job.createManyAndReturn({
+    data: inputs.map((input) => ({
+      source: input.source,
+      company: input.company,
+      companyLogo: input.companyLogo ?? null,
+      title: input.title,
+      dedupeKey: input.dedupeKey,
+      location: input.location,
+      department: input.department ?? null,
+      employmentType: input.employmentType ?? null,
+      description: input.description ?? null,
+      applyUrl: input.applyUrl,
+      postedAt: input.postedAt ?? null,
+      isRemote: input.isRemote,
+      experienceLevel: input.experienceLevel ?? null,
+      minSalary: input.minSalary ?? 0,
+      maxSalary: input.maxSalary ?? 0,
+      externalId: input.externalId ?? null,
+    })),
+    skipDuplicates: true,
+  });

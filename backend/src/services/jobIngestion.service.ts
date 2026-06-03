@@ -6,11 +6,10 @@ import type {
 } from "../../generated/prisma/index.js";
 import { ApiError } from "../utils/ApiError.js";
 import {
-  createJob,
-  findJobByDedupe,
+  createJobsBulk,
   NormalizedJobInput,
 } from "../repositories/jobIngestion.repository.js";
-import { matchJobToUsers } from "./job-matching.service.js";
+import { matchJobsBatch } from "./job-matching.service.js";
 
 export type RawJobInput = {
   source: Source;
@@ -45,11 +44,6 @@ const normalizeText = (value?: string | null) => {
   return trimmed.length > 0 ? trimmed : null;
 };
 
-/**
- * Deterministic SHA-256 dedupe key — mirrors generateDedupeKey() in the
- * scripts layer (scripts/deduplication/generate-dedupe-key.ts) exactly.
- * Both must produce identical output for the same company/title/location.
- */
 const buildDedupeKey = (input: {
   company: string;
   title: string;
@@ -67,46 +61,66 @@ const buildDedupeKey = (input: {
   return createHash("sha256").update(raw).digest("hex");
 };
 
-const normalizeJob = (job: RawJobInput): NormalizedJobInput => {
-  const company = normalizeText(job.company);
-  const title = normalizeText(job.title);
-  const applyUrl = normalizeText(job.applyUrl);
+const normalizeJob = (
+  job: RawJobInput,
+  index: number,
+  errors: IngestionResult["errors"],
+): NormalizedJobInput | null => {
+  try {
+    const company = normalizeText(job.company);
+    const title = normalizeText(job.title);
+    const applyUrl = normalizeText(job.applyUrl);
 
-  if (!company || !title || !applyUrl) {
-    throw new ApiError(400, "Job requires company, title, applyUrl");
-  }
+    if (!company || !title || !applyUrl) {
+      throw new ApiError(400, "Job requires company, title, applyUrl");
+    }
 
-  const location = normalizeText(job.location ?? null);
-  const postedAt =
-    job.postedAt instanceof Date
-      ? job.postedAt
-      : job.postedAt
-        ? new Date(job.postedAt)
-        : null;
+    const location = normalizeText(job.location ?? null);
+    const postedAt =
+      job.postedAt instanceof Date
+        ? job.postedAt
+        : job.postedAt
+          ? new Date(job.postedAt)
+          : null;
 
-  return {
-    source: job.source,
-    company,
-    title,
-    dedupeKey: buildDedupeKey({
+    return {
+      source: job.source,
       company,
       title,
+      dedupeKey: buildDedupeKey({ company, title, location }),
       location,
-    }),
-    location,
-    department: normalizeText(job.department ?? null),
-    employmentType: job.employmentType ?? null,
-    description: normalizeText(job.description ?? null),
-    applyUrl,
-    postedAt: postedAt && !Number.isNaN(postedAt.valueOf()) ? postedAt : null,
-    isRemote: Boolean(job.isRemote),
-    experienceLevel: job.experienceLevel ?? null,
-    minSalary: job.minSalary ?? 0,
-    maxSalary: job.maxSalary ?? 0,
-    externalId: normalizeText(job.externalId ?? null),
-    companyLogo: normalizeText(job.companyLogo ?? null),
-  };
+      department: normalizeText(job.department ?? null),
+      employmentType: job.employmentType ?? null,
+      description: normalizeText(job.description ?? null),
+      applyUrl,
+      postedAt:
+        postedAt && !Number.isNaN(postedAt.valueOf()) ? postedAt : null,
+      isRemote: Boolean(job.isRemote),
+      experienceLevel: job.experienceLevel ?? null,
+      minSalary: job.minSalary ?? 0,
+      maxSalary: job.maxSalary ?? 0,
+      externalId: normalizeText(job.externalId ?? null),
+      companyLogo: normalizeText(job.companyLogo ?? null),
+    };
+  } catch (error) {
+    errors.push({
+      index,
+      reason: error instanceof Error ? error.message : "Unknown error",
+    });
+    return null;
+  }
 };
+
+// Chunk an array into slices of at most `size` elements
+const chunk = <T>(arr: T[], size: number): T[][] => {
+  const chunks: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) {
+    chunks.push(arr.slice(i, i + size));
+  }
+  return chunks;
+};
+
+const BULK_INSERT_CHUNK = 500; // stay well within Postgres parameter limits
 
 export const ingestJobs = async (
   jobs: RawJobInput[],
@@ -120,51 +134,47 @@ export const ingestJobs = async (
     emailsEnqueued: 0,
   };
 
-  for (let i = 0; i < jobs.length; i += 1) {
-    const raw = jobs[i];
+  if (jobs.length === 0) return result;
+
+  // ── Phase 1: normalize ────────────────────────────────────────────────────────
+  const normalized: NormalizedJobInput[] = [];
+  for (let i = 0; i < jobs.length; i++) {
+    const n = normalizeJob(jobs[i], i, result.errors);
+    if (n) normalized.push(n);
+  }
+
+  // ── Phase 2: bulk insert in chunks ───────────────────────────────────────────
+  // createManyAndReturn with skipDuplicates handles race-condition P2002s.
+  // Chunking keeps Postgres parameter count under the ~65k limit.
+  const createdJobs: Array<{
+    id: number;
+    company: string;
+    title: string;
+    location: string | null;
+    isRemote: boolean;
+    description: string | null;
+  }> = [];
+
+  for (const batch of chunk(normalized, BULK_INSERT_CHUNK)) {
     try {
-      const normalized = normalizeJob(raw);
-      const existing = await findJobByDedupe({
-        dedupeKey: normalized.dedupeKey,
-      });
-
-      if (existing) {
-        result.skipped += 1;
-        continue;
-      }
-
-      let created;
-      try {
-        created = await createJob(normalized);
-        result.created += 1;
-      } catch (error) {
-        const code =
-          typeof (error as { code?: string }).code === "string"
-            ? (error as { code?: string }).code
-            : undefined;
-        if (code === "P2002") {
-          result.skipped += 1;
-          continue;
-        }
-        throw error;
-      }
-
-      const matchResult = await matchJobToUsers({
-        jobId: created.id,
-        company: created.company,
-        title: created.title,
-        location: created.location,
-        isRemote: created.isRemote,
-        description: created.description,
-      });
-      result.alertsGenerated += matchResult.notified;
-      result.emailsEnqueued += matchResult.notified;
+      const inserted = await createJobsBulk(batch);
+      createdJobs.push(...inserted);
+      result.created += inserted.length;
+      result.skipped += batch.length - inserted.length; // rows skipped by skipDuplicates
     } catch (error) {
+      // Fallback: if the whole chunk fails for an unexpected reason, record it
       result.errors.push({
-        index: i,
-        reason: error instanceof Error ? error.message : "Unknown error",
+        index: -1,
+        reason: error instanceof Error ? error.message : "Bulk insert failed",
       });
     }
+  }
+
+  // ── Phase 3: batch match all new jobs against users in one pass ───────────────
+  if (createdJobs.length > 0) {
+    const matchResult = await matchJobsBatch(createdJobs);
+    result.alertsGenerated = matchResult.notified;
+    result.emailsEnqueued = matchResult.notified;
   }
 
   return result;

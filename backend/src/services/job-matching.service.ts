@@ -268,3 +268,196 @@ export const matchJobToUsers = async (
 
   return { notified: matched.length };
 };
+
+/**
+ * Batch version of matchJobToUsers — used by ingestJobs() when inserting
+ * many jobs in one pipeline run.
+ *
+ * Strategy: load all eligible users ONCE, then match every job against them
+ * in memory. Write all alerts/notifications in two bulk inserts and enqueue
+ * emails in one parallel batch.
+ *
+ * Query cost: 3 DB reads total (regardless of how many jobs) + 2 bulk writes
+ * + N email queue pushes, vs the old approach of 3N reads + 3N writes.
+ */
+export const matchJobsBatch = async (
+  jobs: JobMatchInput[],
+): Promise<{ notified: number }> => {
+  if (jobs.length === 0) return { notified: 0 };
+
+  // ── Load all eligible users once ─────────────────────────────────────────────
+  const [nonSkillUsers, titleUsers, skillUsers] = await Promise.all([
+    // Users matchable on company / location / remote
+    prisma.user.findMany({
+      where: {
+        email: { not: null },
+        accountEnabled: true,
+        accountLocked: false,
+        emailVerified: true,
+        OR: [
+          { jobPreferences: { is: { emailEnabled: true } } },
+          { jobPreferences: { is: null } },
+        ],
+      },
+      select: {
+        ...userSelect,
+        preferredCompanies: { select: { companyName: true } },
+        profile: {
+          select: {
+            locations: { select: { location: true } },
+            workTypes: { select: { workType: true } },
+          },
+        },
+      },
+    }),
+    // Users with title preferences
+    prisma.user.findMany({
+      where: {
+        email: { not: null },
+        accountEnabled: true,
+        accountLocked: false,
+        emailVerified: true,
+        OR: [
+          { jobPreferences: { is: { emailEnabled: true } } },
+          { jobPreferences: { is: null } },
+        ],
+        jobPreferences: { is: { titles: { some: {} } } },
+      },
+      select: userSelect,
+    }),
+    // Users with skill preferences
+    prisma.user.findMany({
+      where: {
+        email: { not: null },
+        accountEnabled: true,
+        accountLocked: false,
+        emailVerified: true,
+        OR: [
+          { jobPreferences: { is: { emailEnabled: true } } },
+          { jobPreferences: { is: null } },
+        ],
+        jobPreferences: { is: { skills: { some: {} } } },
+      },
+      select: userSelect,
+    }),
+  ]) as [
+    Array<MatchedUser & {
+      preferredCompanies: { companyName: string }[];
+      profile: {
+        locations: { location: string }[];
+        workTypes: { workType: string }[];
+      } | null;
+    }>,
+    MatchedUser[],
+    MatchedUser[],
+  ];
+
+  // ── Match each job in memory ──────────────────────────────────────────────────
+  const alertData: Array<{ userId: number; jobId: number }> = [];
+  const notificationData: Array<{
+    userId: number;
+    title: string;
+    message: string;
+    type: "JOB_ALERT";
+  }> = [];
+  const emailJobs: Array<{ userId: number; jobId: number }> = [];
+
+  let totalNotified = 0;
+
+  for (const job of jobs) {
+    const titleLower = job.title.toLowerCase();
+    const descLower = (job.description ?? "").toLowerCase();
+    const matchedIds = new Set<number>();
+
+    // Company / location / remote matches
+    for (const u of nonSkillUsers) {
+      if (matchedIds.has(u.id)) continue;
+      const companyMatch = u.preferredCompanies?.some(
+        (c) => c.companyName.toLowerCase() === job.company.toLowerCase(),
+      );
+      const locationMatch =
+        job.location &&
+        u.profile?.locations?.some((l) =>
+          job.location!.toLowerCase().includes(l.location.toLowerCase()),
+        );
+      const remoteMatch =
+        job.isRemote &&
+        u.profile?.workTypes?.some((w) => w.workType === "REMOTE");
+
+      if (companyMatch || locationMatch || remoteMatch) {
+        matchedIds.add(u.id);
+      }
+    }
+
+    // Title matches
+    if (titleLower.length > 0) {
+      for (const u of titleUsers) {
+        if (matchedIds.has(u.id)) continue;
+        if (
+          u.jobPreferences?.titles?.some((t) =>
+            titleLower.includes(t.title.toLowerCase()),
+          )
+        ) {
+          matchedIds.add(u.id);
+        }
+      }
+    }
+
+    // Skill matches
+    if (descLower.length > 0) {
+      for (const u of skillUsers) {
+        if (matchedIds.has(u.id)) continue;
+        if (
+          u.jobPreferences?.skills?.some((s) =>
+            descLower.includes(s.skill.toLowerCase()),
+          )
+        ) {
+          matchedIds.add(u.id);
+        }
+      }
+    }
+
+    if (matchedIds.size === 0) continue;
+    totalNotified += matchedIds.size;
+
+    for (const userId of matchedIds) {
+      alertData.push({ userId, jobId: job.jobId });
+      notificationData.push({
+        userId,
+        title: `New role at ${job.company}`,
+        message: `${job.title} was just posted${job.location ? ` · ${job.location}` : ""}.`,
+        type: "JOB_ALERT",
+      });
+      emailJobs.push({ userId, jobId: job.jobId });
+    }
+  }
+
+  if (alertData.length === 0) return { notified: 0 };
+
+  // ── Bulk write alerts + notifications ────────────────────────────────────────
+  await Promise.all([
+    prisma.jobAlert.createMany({ data: alertData, skipDuplicates: true }),
+    prisma.notification.createMany({ data: notificationData }),
+  ]);
+
+  // ── Enqueue emails in parallel ────────────────────────────────────────────────
+  await Promise.all(
+    emailJobs.map(({ userId, jobId }) =>
+      emailQueue.add(
+        "jobAlert",
+        { userId, jobId },
+        {
+          delay: 2_000,
+          removeOnComplete: true,
+          removeOnFail: { count: 5 },
+        },
+      ),
+    ),
+  );
+
+  console.log(
+    `[Matching] Batch: ${jobs.length} jobs → ${totalNotified} alert(s) created`,
+  );
+
+  return { notified: totalNotified };
+};
