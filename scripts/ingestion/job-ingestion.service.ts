@@ -289,3 +289,14 @@ export const runAllPipelines = async (): Promise<PipelineResult> => {
   await metrics.flush();
   return aggregate;
 };
+
+// ─── Direct execution ─────────────────────────────────────────────────────────
+runAllPipelines()
+  .then((result) => {
+    console.log("[Ingestion] Completed:", result);
+    process.exit(0);
+  })
+  .catch((err) => {
+    console.error("[Ingestion] Fatal error:", err);
+    process.exit(1);
+  });
