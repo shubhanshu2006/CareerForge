@@ -127,6 +127,43 @@ export default function JobCard({ job, onStatusChange }: JobCardProps) {
     }
   };
 
+  const handleSaveToggle = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (loading) return;
+
+    setLoading(true);
+    try {
+      const isSaved = currentStatus === "SAVED";
+      if (isSaved) {
+        // Unsave — withdraw the application
+        if (applicationId) {
+          await unwrap(await api.updateApplicationStatus(applicationId, "WITHDRAWN"));
+        }
+        setCurrentStatus(null);
+        onStatusChange?.(id, null);
+        toast.success("Removed from saved");
+      } else {
+        // Save job
+        if (!applicationId) {
+          const appData = await unwrap<{ id: number }>(await api.createApplication(id));
+          setApplicationId(appData.id);
+          await unwrap(await api.updateApplicationStatus(appData.id, "SAVED"));
+        } else {
+          await unwrap(await api.updateApplicationStatus(applicationId, "SAVED"));
+        }
+        setCurrentStatus("SAVED");
+        onStatusChange?.(id, "SAVED");
+        toast.success("Job saved");
+      }
+    } catch (err) {
+      toast.error("Failed to save job");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleAppliedToggle = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -136,6 +173,7 @@ export default function JobCard({ job, onStatusChange }: JobCardProps) {
     await handleStatusChange(syntheticEvent);
   };
 
+  const isSaved = currentStatus === "SAVED";
   const statusStyle = currentStatus ? getStatusStyle(currentStatus) : null;
 
   return (
@@ -184,13 +222,13 @@ export default function JobCard({ job, onStatusChange }: JobCardProps) {
           {companyLabel.charAt(0).toUpperCase()}
         </div>
         <button
-          onClick={handleAppliedToggle}
+          onClick={handleSaveToggle}
           disabled={loading}
-          title={isTracked ? "Remove from tracker" : "Track this job"}
+          title={isSaved ? "Remove from saved" : "Save job"}
           style={{
             background: "transparent",
             border: "none",
-            color: isTracked ? "#c084fc" : "var(--color-white-40)",
+            color: isSaved ? "#c084fc" : "var(--color-white-40)",
             fontSize: "17px",
             cursor: "pointer",
             padding: "8px",
@@ -201,14 +239,10 @@ export default function JobCard({ job, onStatusChange }: JobCardProps) {
             transition: "all 0.2s",
             opacity: loading ? 0.5 : 1,
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = "var(--color-surface-3)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = "transparent";
-          }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = "var(--color-surface-3)"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
         >
-          {isTracked ? <FaBookmark /> : <FaRegBookmark />}
+          {isSaved ? <FaBookmark /> : <FaRegBookmark />}
         </button>
       </div>
 

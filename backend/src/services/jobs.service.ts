@@ -12,6 +12,7 @@ export const getJobs = async (input: {
   sort: JobSort;
   page: number;
   limit: number;
+  userId?: number;
 }) => {
   const skip = (input.page - 1) * input.limit;
   const { total, items } = await findJobs({
@@ -19,6 +20,7 @@ export const getJobs = async (input: {
     sort: input.sort,
     skip,
     take: input.limit,
+    userId: input.userId,
   });
 
   return {
@@ -31,8 +33,8 @@ export const getJobs = async (input: {
 
 export const getJobCounts = () => getJobTypeCounts();
 
-export const getJobById = async (id: number) => {
-  const job = await findJobById(id);
+export const getJobById = async (id: number, userId?: number) => {
+  const job = await findJobById(id, userId);
   if (!job) {
     throw new ApiError(404, "Job not found");
   }

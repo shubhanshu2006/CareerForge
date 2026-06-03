@@ -3,6 +3,9 @@ import cors from "cors";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 import healthRoutes from "./routes/health.routes.js";
 import profileRoutes from "./routes/profile.routes.js";
@@ -17,7 +20,22 @@ import { errorHandler } from "./middleware/error.middleware.js";
 
 const app = express();
 
-app.use(cors());
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(",").map((o) => o.trim())
+  : ["http://localhost:3000"];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin) || process.env.NODE_ENV !== "production") {
+        return callback(null, true);
+      }
+      return callback(new Error(`CORS: origin ${origin} not allowed`));
+    },
+    credentials: true, // allow cookies / Authorization headers
+  }),
+);
 
 app.use(helmet());
 

@@ -16,10 +16,39 @@ export type JobFilters = {
 
 export type JobSort = "latest" | "salary" | "relevance";
 
-export const findJobById = (id: number) =>
-  prisma.job.findUnique({
+export const findJobById = async (id: number, userId?: number) => {
+  const job = await prisma.job.findUnique({
     where: { id },
+    include: userId
+      ? {
+          jobAlerts: { where: { userId }, select: { id: true } },
+          applications: {
+            where: { userId },
+            select: { id: true, status: true },
+          },
+        }
+      : undefined,
   });
+  if (!job) return null;
+
+  // Flatten application info onto the job object
+  const application = userId && "applications" in job
+    ? (job.applications as Array<{ id: number; status: string }>)[0] ?? null
+    : null;
+
+  // Strip the includes from the returned object and add flat fields
+  const { applications: _a, jobAlerts: _j, ...rest } = job as typeof job & {
+    applications?: Array<{ id: number; status: string }>;
+    jobAlerts?: unknown[];
+  };
+  void _a; void _j;
+
+  return {
+    ...rest,
+    applicationId: application?.id ?? null,
+    applicationStatus: application?.status ?? null,
+  };
+};
 
 export const getJobTypeCounts = async () => {
   const [all, fullTime, internship] = await Promise.all([
@@ -57,6 +86,7 @@ export const findJobs = async (input: {
   sort: JobSort;
   skip: number;
   take: number;
+  userId?: number;
 }) => {
   const { filters } = input;
   const where: Prisma.JobWhereInput = {
@@ -198,15 +228,39 @@ export const findJobs = async (input: {
     }
   })();
 
-  const [total, items] = await Promise.all([
+  const [total, rawItems] = await Promise.all([
     prisma.job.count({ where }),
     prisma.job.findMany({
       where,
       orderBy,
       skip: input.skip,
       take: input.take,
+      include: input.userId
+        ? {
+            applications: {
+              where: { userId: input.userId },
+              select: { id: true, status: true },
+            },
+          }
+        : undefined,
     }),
   ]);
+
+  // Flatten application info onto each job
+  const items = rawItems.map((job) => {
+    const application = input.userId && "applications" in job
+      ? (job.applications as Array<{ id: number; status: string }>)[0] ?? null
+      : null;
+    const { applications: _a, ...rest } = job as typeof job & {
+      applications?: Array<{ id: number; status: string }>;
+    };
+    void _a;
+    return {
+      ...rest,
+      applicationId: application?.id ?? null,
+      applicationStatus: application?.status ?? null,
+    };
+  });
 
   return { total, items };
 };

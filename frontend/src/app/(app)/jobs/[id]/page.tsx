@@ -126,6 +126,34 @@ export default function JobDetailPage() {
     }
   };
 
+  const handleSaveToggle = async () => {
+    if (actionLoading || !job) return;
+    setActionLoading(true);
+    const api = createApi(() => getToken());
+    try {
+      if (status === "SAVED") {
+        if (appId) await unwrap(await api.updateApplicationStatus(appId, "WITHDRAWN"));
+        setStatus("NOT_APPLIED");
+        setAppId(null);
+        toast.success("Removed from saved");
+      } else {
+        if (!appId) {
+          const app = await unwrap<{ id: number }>(await api.createApplication(job.id));
+          setAppId(app.id);
+          await unwrap(await api.updateApplicationStatus(app.id, "SAVED"));
+        } else {
+          await unwrap(await api.updateApplicationStatus(appId, "SAVED"));
+        }
+        setStatus("SAVED");
+        toast.success("Job saved");
+      }
+    } catch {
+      toast.error("Failed to save job");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const companyLabel = job?.companyName ?? job?.company ?? "Company";
 
   if (loading) {
@@ -192,8 +220,13 @@ export default function JobDetailPage() {
 
               {/* Action buttons */}
               <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
-                <button style={{ display: "flex", alignItems: "center", gap: "6px", background: "var(--color-surface-3)", border: "1px solid var(--color-border)", borderRadius: "10px", padding: "10px 16px", color: "var(--color-white-65)", fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "13px", cursor: "pointer" }}>
-                  <FaBookmark style={{ fontSize: "11px" }} /> Save Job
+                <button
+                  onClick={handleSaveToggle}
+                  disabled={actionLoading}
+                  style={{ display: "flex", alignItems: "center", gap: "6px", background: status === "SAVED" ? "rgba(192,132,252,0.12)" : "var(--color-surface-3)", border: status === "SAVED" ? "1px solid rgba(192,132,252,0.3)" : "1px solid var(--color-border)", borderRadius: "10px", padding: "10px 16px", color: status === "SAVED" ? "#c084fc" : "var(--color-white-65)", fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "13px", cursor: "pointer", transition: "all 0.2s" }}
+                >
+                  <FaBookmark style={{ fontSize: "11px" }} />
+                  {status === "SAVED" ? "Saved" : "Save Job"}
                 </button>
 
                 {/* Status dropdown */}

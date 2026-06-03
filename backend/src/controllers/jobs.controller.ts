@@ -47,12 +47,14 @@ const parseQuery = (req: Request) => {
 
 export const listJobs = asyncHandler(async (req: Request, res: Response) => {
   const data = parseQuery(req);
+  const userId = (req as Request & { user?: { id: number } }).user?.id;
 
   const result = await getJobs({
     filters: buildFilters(data),
     sort: data.sort || "latest",
     page: data.page || 1,
     limit: data.limit || 20,
+    userId,
   });
 
   return res.status(200).json(new ApiResponse(200, result, "Jobs fetched"));
@@ -60,12 +62,14 @@ export const listJobs = asyncHandler(async (req: Request, res: Response) => {
 
 export const searchJobs = asyncHandler(async (req: Request, res: Response) => {
   const data = parseQuery(req);
+  const userId = (req as Request & { user?: { id: number } }).user?.id;
 
   const result = await getJobs({
     filters: buildFilters(data),
     sort: data.sort || (data.q ? "relevance" : "latest"),
     page: data.page || 1,
     limit: data.limit || 20,
+    userId,
   });
 
   return res.status(200).json(new ApiResponse(200, result, "Jobs fetched"));
@@ -76,9 +80,8 @@ export const getJob = asyncHandler(async (req: Request, res: Response) => {
   if (!Number.isInteger(id)) {
     throw new ApiError(400, "Invalid job id");
   }
-
-  const result = await getJobById(id);
-
+  const userId = (req as Request & { user?: { id: number } }).user?.id;
+  const result = await getJobById(id, userId);
   return res.status(200).json(new ApiResponse(200, result, "Job fetched"));
 });
 
