@@ -107,7 +107,7 @@ const fetchJobsForCompany = async (
  */
 export const scrapeAshby = async (
   companies: string[],
-  concurrency = 5
+  concurrency = 12
 ): Promise<AshbyScrapeResult[]> => {
   const results: AshbyScrapeResult[] = [];
 

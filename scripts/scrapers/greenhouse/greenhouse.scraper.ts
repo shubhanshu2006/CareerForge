@@ -97,7 +97,7 @@ const fetchJobsForCompany = async (
  */
 export const scrapeGreenhouse = async (
   companies: string[],
-  concurrency = 5
+  concurrency = 12
 ): Promise<GreenhouseScrapeResult[]> => {
   const results: GreenhouseScrapeResult[] = [];
 

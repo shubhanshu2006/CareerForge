@@ -291,12 +291,19 @@ export const runAllPipelines = async (): Promise<PipelineResult> => {
 };
 
 // ─── Direct execution ─────────────────────────────────────────────────────────
-runAllPipelines()
-  .then((result) => {
-    console.log("[Ingestion] Completed:", result);
-    process.exit(0);
-  })
-  .catch((err) => {
-    console.error("[Ingestion] Fatal error:", err);
-    process.exit(1);
-  });
+// Only run when this file is executed directly (not when imported by test scripts)
+const isMain =
+  process.argv[1] &&
+  path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url));
+
+if (isMain) {
+  runAllPipelines()
+    .then((result) => {
+      console.log("[Ingestion] Completed:", result);
+      process.exit(0);
+    })
+    .catch((err) => {
+      console.error("[Ingestion] Fatal error:", err);
+      process.exit(1);
+    });
+}

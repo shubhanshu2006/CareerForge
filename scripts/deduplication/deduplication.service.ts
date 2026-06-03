@@ -10,53 +10,73 @@ export interface DedupeResult {
 }
 
 /**
- * Checks whether a job already exists in the database.
+ * Filters a batch of normalized jobs against the database using two bulk
+ * queries instead of one query per job.
  *
- * Two-stage check:
- *   1. source + sourceJobId match  → definitive duplicate (same job from same board)
- *   2. dedupeKey match             → content duplicate (same job, different source)
+ * Two-stage check (batch mode):
+ *   1. Fetch all existing (source, sourceJobId) pairs in one query
+ *   2. Fetch all existing dedupeKeys in one query
  *
- * @param job - The normalized job to check
- * @returns true if the job should be skipped
- */
-const isDuplicate = async (job: NormalizedJob): Promise<boolean> => {
-  // Fast path: exact source + id combo
-  if (job.source && job.sourceJobId) {
-    const existing = await prisma.job.findFirst({
-      where: {
-        source: job.source as never,
-        sourceJobId: job.sourceJobId,
-      },
-      select: { id: true },
-    });
-    if (existing) return true;
-  }
-
-  // Content-hash path: same job posted under different source
-  const existingByKey = await prisma.job.findFirst({
-    where: { dedupeKey: job.dedupeKey },
-    select: { id: true },
-  });
-
-  return Boolean(existingByKey);
-};
-
-/**
- * Filters a batch of normalized jobs against the database, returning only
- * the jobs that are genuinely new and safe to insert.
- *
- * Processes sequentially to keep DB load predictable, while still being fast
- * enough for typical batch sizes (< 1000 jobs per run).
+ * Any job matching either set is a duplicate and gets skipped.
  */
 export const deduplicateJobs = async (
   jobs: NormalizedJob[]
 ): Promise<DedupeResult> => {
+  if (jobs.length === 0) return { toInsert: [], skipped: 0 };
+
+  // ── Stage 1: bulk source+id lookup ──────────────────────────────────────────
+  const jobsWithSourceId = jobs.filter((j) => j.source && j.sourceJobId);
+
+  const existingBySourceId = new Set<string>();
+  if (jobsWithSourceId.length > 0) {
+    // Build OR filter for all (source, sourceJobId) pairs
+    const existing = await prisma.job.findMany({
+      where: {
+        OR: jobsWithSourceId.map((j) => ({
+          source: j.source as never,
+          sourceJobId: j.sourceJobId!,
+        })),
+      },
+      select: { source: true, sourceJobId: true },
+    });
+    for (const row of existing) {
+      if (row.sourceJobId) {
+        existingBySourceId.add(`${row.source}:${row.sourceJobId}`);
+      }
+    }
+  }
+
+  // ── Stage 2: bulk dedupeKey lookup ──────────────────────────────────────────
+  const allDedupeKeys = jobs
+    .map((j) => j.dedupeKey)
+    .filter((k): k is string => Boolean(k));
+
+  const existingDedupeKeys = new Set<string>();
+  if (allDedupeKeys.length > 0) {
+    const existing = await prisma.job.findMany({
+      where: { dedupeKey: { in: allDedupeKeys } },
+      select: { dedupeKey: true },
+    });
+    for (const row of existing) {
+      if (row.dedupeKey) existingDedupeKeys.add(row.dedupeKey);
+    }
+  }
+
+  // ── Filter ───────────────────────────────────────────────────────────────────
   const toInsert: NormalizedJob[] = [];
   let skipped = 0;
 
   for (const job of jobs) {
-    const dup = await isDuplicate(job);
-    if (dup) {
+    const sourceIdKey =
+      job.source && job.sourceJobId
+        ? `${job.source}:${job.sourceJobId}`
+        : null;
+
+    const isDuplicate =
+      (sourceIdKey && existingBySourceId.has(sourceIdKey)) ||
+      (job.dedupeKey && existingDedupeKeys.has(job.dedupeKey));
+
+    if (isDuplicate) {
       skipped += 1;
     } else {
       toInsert.push(job);
