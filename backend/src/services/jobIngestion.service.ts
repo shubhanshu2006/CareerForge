@@ -172,7 +172,9 @@ export const ingestJobs = async (
 
   // ── Phase 3: batch match all new jobs against users in one pass ───────────────
   if (createdJobs.length > 0) {
-    const matchResult = await matchJobsBatch(createdJobs);
+    const matchResult = await matchJobsBatch(
+      createdJobs.map((j) => ({ ...j, jobId: j.id })),
+    );
     result.alertsGenerated = matchResult.notified;
     result.emailsEnqueued = matchResult.notified;
   }
