@@ -21,7 +21,10 @@ const monoFont = Space_Mono({
 
 export const metadata: Metadata = {
   title: "CareerForge",
-  description: "Discover jobs early, track them smartly, and move faster than the market."
+  description: "Discover jobs early, track them smartly, and move faster than the market.",
+  icons: {
+    icon: "/Logo.png",
+  },
 };
 
 export default function RootLayout({
