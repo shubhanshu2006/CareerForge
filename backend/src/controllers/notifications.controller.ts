@@ -40,7 +40,7 @@ export const markAllNotificationsRead = asyncHandler(
 export const markNotificationRead = asyncHandler(
   async (req: Request, res: Response) => {
     const userId = getUserId(req);
-    const id = parseInt(req.params.id, 10);
+    const id = parseInt(Array.isArray(req.params.id) ? req.params.id[0] : req.params.id, 10);
     if (Number.isNaN(id)) throw new ApiError(400, "Invalid notification id");
     await markOneRead(id, userId);
     return res.status(200).json(
