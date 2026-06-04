@@ -19,18 +19,20 @@ import {
   FaHeartbeat,
   FaHeart,
   FaShieldAlt,
+  FaBell,
 } from "react-icons/fa";
 
 const NAV_ITEMS: { label: string; path: Route; icon: React.ReactNode }[] = [
-  { label: "Dashboard",   path: "/dashboard" as Route,    icon: <FaTh /> },
-  { label: "Browse Jobs", path: "/jobs" as Route,          icon: <FaSearch /> },
-  { label: "For You",     path: "/for-you" as Route,       icon: <FaHeart /> },
-  { label: "Applications",path: "/applications" as Route,  icon: <FaPaperPlane /> },
-  { label: "Growth Tracker", path: "/weaknesses" as Route, icon: <FaShieldAlt /> },
-  { label: "Saved Jobs",  path: "/saved" as Route,         icon: <FaBookmark /> },
-  { label: "Preferences", path: "/preferences" as Route,   icon: <FaSlidersH /> },
-  { label: "Profile",     path: "/profile" as Route,        icon: <FaUser /> },
-  { label: "Monitoring",  path: "/monitoring" as Route,    icon: <FaHeartbeat /> },
+  { label: "Dashboard",      path: "/dashboard" as Route,     icon: <FaTh /> },
+  { label: "Browse Jobs",    path: "/jobs" as Route,           icon: <FaSearch /> },
+  { label: "For You",        path: "/for-you" as Route,        icon: <FaHeart /> },
+  { label: "Applications",   path: "/applications" as Route,   icon: <FaPaperPlane /> },
+  { label: "Growth Tracker", path: "/weaknesses" as Route,     icon: <FaShieldAlt /> },
+  { label: "Saved Jobs",     path: "/saved" as Route,          icon: <FaBookmark /> },
+  { label: "Notifications",  path: "/notifications" as Route,  icon: <FaBell /> },
+  { label: "Preferences",    path: "/preferences" as Route,    icon: <FaSlidersH /> },
+  { label: "Profile",        path: "/profile" as Route,         icon: <FaUser /> },
+  { label: "Monitoring",     path: "/monitoring" as Route,     icon: <FaHeartbeat /> },
 ];
 
 export default function Sidebar() {

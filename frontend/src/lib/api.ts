@@ -141,6 +141,16 @@ export function createApi(getToken: () => Promise<string | null>) {
         method: "DELETE",
       }),
 
+    // ── Notifications ─────────────────────────────────────────────────────────
+    getNotifications: () =>
+      req("/api/v1/notifications", { method: "GET" }),
+
+    markAllNotificationsRead: () =>
+      req("/api/v1/notifications/read-all", { method: "PATCH" }),
+
+    markNotificationRead: (id: number) =>
+      req(`/api/v1/notifications/${id}/read`, { method: "PATCH" }),
+
     // ── Preferences ───────────────────────────────────────────────────────────
     getPreferences: () =>
       req("/api/v1/preferences", { method: "GET" }),

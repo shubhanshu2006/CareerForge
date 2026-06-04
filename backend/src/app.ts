@@ -15,6 +15,7 @@ import applicationsRoutes from "./routes/applications.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
 import chatRoutes from "./routes/chat.routes.js";
 import monitoringRoutes from "./routes/monitoring.routes.js";
+import notificationsRoutes from "./routes/notifications.routes.js";
 import { notFound } from "./middleware/notFound.middleware.js";
 import { errorHandler } from "./middleware/error.middleware.js";
 
@@ -53,6 +54,7 @@ app.use("/api/v1/applications", applicationsRoutes);
 app.use("/api/v1/dashboard", dashboardRoutes);
 app.use("/api/v1/chat", chatRoutes);
 app.use("/api/v1/monitoring", monitoringRoutes);
+app.use("/api/v1/notifications", notificationsRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
