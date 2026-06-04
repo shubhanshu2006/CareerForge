@@ -1,6 +1,7 @@
 import { Worker } from "bullmq";
 import { redisConnection } from "../config/redis.js";
 import {
+  sendJobAlertDigestEmail,
   sendJobAlertEmail,
   sendWelcomeEmail,
   sendVerificationEmail,
@@ -19,6 +20,12 @@ export const emailWorker = new Worker(
           jobId: job.data.jobId,
         });
 
+      case "jobAlertDigest":
+        return sendJobAlertDigestEmail({
+          userId: job.data.userId,
+          topJobIds: job.data.topJobIds,
+        });
+
       case "verifyEmail":
         return sendVerificationEmail({
           userId: job.data.userId,
@@ -32,7 +39,7 @@ export const emailWorker = new Worker(
   },
   {
     connection: redisConnection,
-    concurrency: 5, // Email jobs are I/O-bound; run several in parallel
+    concurrency: 5,
   },
 );
 

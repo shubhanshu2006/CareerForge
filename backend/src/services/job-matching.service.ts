@@ -274,11 +274,13 @@ export const matchJobToUsers = async (
  * many jobs in one pipeline run.
  *
  * Strategy: load all eligible users ONCE, then match every job against them
- * in memory. Write all alerts/notifications in two bulk inserts and enqueue
- * emails in one parallel batch.
+ * in memory. Track per-job match scores (company=3 > title=2 > skill=1) so
+ * the digest email can surface the top 10 most relevant matches per user.
  *
- * Query cost: 3 DB reads total (regardless of how many jobs) + 2 bulk writes
- * + N email queue pushes, vs the old approach of 3N reads + 3N writes.
+ * Email strategy (Option 1 + 2):
+ *   - One digest email per user per pipeline run (not one per job)
+ *   - Digest contains at most 10 jobs, ranked by match score descending
+ *   - All matched job alerts still written to DB for the in-app feed
  */
 export const matchJobsBatch = async (
   jobs: JobMatchInput[],
@@ -287,7 +289,6 @@ export const matchJobsBatch = async (
 
   // ── Load all eligible users once ─────────────────────────────────────────────
   const [nonSkillUsers, titleUsers, skillUsers] = await Promise.all([
-    // Users matchable on company / location / remote
     prisma.user.findMany({
       where: {
         email: { not: null },
@@ -310,7 +311,6 @@ export const matchJobsBatch = async (
         },
       },
     }),
-    // Users with title preferences
     prisma.user.findMany({
       where: {
         email: { not: null },
@@ -325,7 +325,6 @@ export const matchJobsBatch = async (
       },
       select: userSelect,
     }),
-    // Users with skill preferences
     prisma.user.findMany({
       where: {
         email: { not: null },
@@ -352,26 +351,22 @@ export const matchJobsBatch = async (
     MatchedUser[],
   ];
 
-  // ── Match each job in memory ──────────────────────────────────────────────────
-  const alertData: Array<{ userId: number; jobId: number }> = [];
-  const notificationData: Array<{
-    userId: number;
-    title: string;
-    message: string;
-    type: "JOB_ALERT";
-  }> = [];
-  const emailJobs: Array<{ userId: number; jobId: number }> = [];
+  // ── Match scores: company=3, title=2, skill=1 ─────────────────────────────────
+  // userMatchMap: userId → Map<jobId, score>
+  const userMatchMap = new Map<number, Map<number, number>>();
 
-  let totalNotified = 0;
+  const addMatch = (userId: number, jobId: number, score: number) => {
+    if (!userMatchMap.has(userId)) userMatchMap.set(userId, new Map());
+    const jobs = userMatchMap.get(userId)!;
+    jobs.set(jobId, (jobs.get(jobId) ?? 0) + score);
+  };
 
   for (const job of jobs) {
     const titleLower = job.title.toLowerCase();
     const descLower = (job.description ?? "").toLowerCase();
-    const matchedIds = new Set<number>();
 
-    // Company / location / remote matches
+    // Company / location / remote → score 3
     for (const u of nonSkillUsers) {
-      if (matchedIds.has(u.id)) continue;
       const companyMatch = u.preferredCompanies?.some(
         (c) => c.companyName.toLowerCase() === job.company.toLowerCase(),
       );
@@ -385,69 +380,90 @@ export const matchJobsBatch = async (
         u.profile?.workTypes?.some((w) => w.workType === "REMOTE");
 
       if (companyMatch || locationMatch || remoteMatch) {
-        matchedIds.add(u.id);
+        addMatch(u.id, job.jobId, 3);
       }
     }
 
-    // Title matches
+    // Title → score 2
     if (titleLower.length > 0) {
       for (const u of titleUsers) {
-        if (matchedIds.has(u.id)) continue;
         if (
           u.jobPreferences?.titles?.some((t) =>
             titleLower.includes(t.title.toLowerCase()),
           )
         ) {
-          matchedIds.add(u.id);
+          addMatch(u.id, job.jobId, 2);
         }
       }
     }
 
-    // Skill matches
+    // Skill → score 1
     if (descLower.length > 0) {
       for (const u of skillUsers) {
-        if (matchedIds.has(u.id)) continue;
         if (
           u.jobPreferences?.skills?.some((s) =>
             descLower.includes(s.skill.toLowerCase()),
           )
         ) {
-          matchedIds.add(u.id);
+          addMatch(u.id, job.jobId, 1);
         }
       }
     }
-
-    if (matchedIds.size === 0) continue;
-    totalNotified += matchedIds.size;
-
-    for (const userId of matchedIds) {
-      alertData.push({ userId, jobId: job.jobId });
-      notificationData.push({
-        userId,
-        title: `New role at ${job.company}`,
-        message: `${job.title} was just posted${job.location ? ` · ${job.location}` : ""}.`,
-        type: "JOB_ALERT",
-      });
-      emailJobs.push({ userId, jobId: job.jobId });
-    }
   }
 
-  if (alertData.length === 0) return { notified: 0 };
+  if (userMatchMap.size === 0) return { notified: 0 };
 
-  // ── Bulk write alerts + notifications ────────────────────────────────────────
+  // ── Build bulk DB writes ──────────────────────────────────────────────────────
+  const alertData: Array<{ userId: number; jobId: number }> = [];
+  const notificationData: Array<{
+    userId: number;
+    title: string;
+    message: string;
+    type: "JOB_ALERT";
+  }> = [];
+
+  // Per-user digest: top-10 job IDs sorted by score desc
+  const digestQueue: Array<{ userId: number; topJobIds: number[] }> = [];
+
+  for (const [userId, jobScoreMap] of userMatchMap) {
+    const sorted = [...jobScoreMap.entries()]
+      .sort((a, b) => b[1] - a[1])           // highest score first
+      .map(([jobId]) => jobId);
+
+    const topJobIds = sorted.slice(0, 10);
+    const totalMatches = sorted.length;
+
+    // All matched jobs go to the in-app alert feed
+    for (const jobId of sorted) {
+      alertData.push({ userId, jobId });
+    }
+
+    // Single in-app notification summarising the run
+    notificationData.push({
+      userId,
+      title: `${totalMatches} new job${totalMatches !== 1 ? "s" : ""} matching your preferences`,
+      message: `We found ${totalMatches} new role${totalMatches !== 1 ? "s" : ""} for you. See them in your alerts.`,
+      type: "JOB_ALERT",
+    });
+
+    // One digest email per user
+    digestQueue.push({ userId, topJobIds });
+  }
+
+  // ── Bulk write alerts + notification ─────────────────────────────────────────
   await Promise.all([
     prisma.jobAlert.createMany({ data: alertData, skipDuplicates: true }),
     prisma.notification.createMany({ data: notificationData }),
   ]);
 
-  // ── Enqueue emails in parallel ────────────────────────────────────────────────
+  // ── Enqueue ONE digest email per user ─────────────────────────────────────────
   await Promise.all(
-    emailJobs.map(({ userId, jobId }) =>
+    digestQueue.map(({ userId, topJobIds }) =>
       emailQueue.add(
-        "jobAlert",
-        { userId, jobId },
+        "jobAlertDigest",
+        { userId, topJobIds },
         {
-          delay: 2_000,
+          delay: 5_000,           // short delay to let DB writes settle
           removeOnComplete: true,
           removeOnFail: { count: 5 },
         },
@@ -456,8 +472,8 @@ export const matchJobsBatch = async (
   );
 
   console.log(
-    `[Matching] Batch: ${jobs.length} jobs → ${totalNotified} alert(s) created`,
+    `[Matching] Batch: ${jobs.length} jobs → ${alertData.length} alert(s) for ${userMatchMap.size} user(s) → ${digestQueue.length} digest email(s) queued`,
   );
 
-  return { notified: totalNotified };
+  return { notified: userMatchMap.size };
 };

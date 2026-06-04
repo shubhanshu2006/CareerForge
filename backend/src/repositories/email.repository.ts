@@ -18,6 +18,20 @@ export const findJobForEmail = (jobId: number) =>
     },
   });
 
+export const findJobsForEmail = (jobIds: number[]) =>
+  prisma.job.findMany({
+    where: { id: { in: jobIds } },
+    select: {
+      id: true,
+      title: true,
+      company: true,
+      location: true,
+      applyUrl: true,
+      isRemote: true,
+      employmentType: true,
+    },
+  });
+
 export const markJobAlertEmailed = (input: { userId: number; jobId: number }) =>
   prisma.jobAlert.updateMany({
     where: {

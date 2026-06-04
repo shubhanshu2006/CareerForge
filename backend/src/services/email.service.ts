@@ -3,6 +3,7 @@ import { getTransactionalEmailApi } from "../config/brevo.js";
 import { ApiError } from "../utils/ApiError.js";
 import {
   findJobForEmail,
+  findJobsForEmail,
   findUserForEmail,
   markJobAlertEmailed,
 } from "../repositories/email.repository.js";
@@ -255,4 +256,94 @@ export const sendJobAlertEmail = async (input: {
     userId: input.userId,
     jobId: input.jobId,
   });
+};
+
+export const sendJobAlertDigestEmail = async (input: {
+  userId: number;
+  topJobIds: number[];
+}) => {
+  const [user, jobs] = await Promise.all([
+    findUserForEmail(input.userId),
+    findJobsForEmail(input.topJobIds),
+  ]);
+
+  if (!user || !user.email) {
+    throw new ApiError(404, "User email not found");
+  }
+  if (jobs.length === 0) return; // all jobs may have been deleted
+
+  const appUrl = (process.env.APP_URL || "https://careerforge.ai").replace(/\/$/, "");
+  const alertsUrl = `${appUrl}/for-you`;
+
+  // Sort jobs back into the original topJobIds order (preserves score rank)
+  const jobMap = new Map(jobs.map((j) => [j.id, j]));
+  const ordered = input.topJobIds
+    .map((id) => jobMap.get(id))
+    .filter((j): j is NonNullable<typeof j> => Boolean(j));
+
+  const firstName = (user.username || "there").split(/[\s_]+/)[0] || "there";
+  const totalShown = ordered.length;
+
+  const jobRowsHtml = ordered
+    .map(
+      (job, i) => `
+      <tr>
+        <td style="padding: 14px 0; border-bottom: 1px solid #f3f4f6;">
+          <table cellpadding="0" cellspacing="0" border="0" width="100%">
+            <tr>
+              <td style="width: 28px; vertical-align: top; padding-top: 2px;">
+                <span style="display: inline-block; width: 22px; height: 22px; background: rgba(249,115,22,0.1); border: 1px solid rgba(249,115,22,0.25); border-radius: 6px; text-align: center; font-size: 11px; font-weight: 700; color: #f97316; line-height: 22px;">${i + 1}</span>
+              </td>
+              <td style="padding-left: 12px;">
+                <a href="${job.applyUrl}" style="font-size: 15px; font-weight: 700; color: #111827; text-decoration: none; line-height: 1.3; display: block;">${job.title}</a>
+                <span style="font-size: 13px; color: #6b7280; line-height: 1.6;">
+                  ${job.company}${job.location ? ` &nbsp;·&nbsp; ${job.location}` : ""}${job.isRemote ? " &nbsp;·&nbsp; Remote" : ""}
+                </span>
+              </td>
+              <td style="width: 80px; text-align: right; vertical-align: middle; padding-left: 8px;">
+                <a href="${job.applyUrl}" style="display: inline-block; background: #f97316; color: #ffffff; font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 999px; text-decoration: none; white-space: nowrap;">Apply →</a>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>`,
+    )
+    .join("");
+
+  const bodyHtml = `
+    <p style="margin: 0 0 20px; font-size: 16px; color: #374151; line-height: 1.7;">
+      We found <strong style="color: #111827;">${totalShown} new role${totalShown !== 1 ? "s" : ""}</strong> matching your preferences. Here are the top picks, ranked by relevance:
+    </p>
+
+    <table cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse: collapse; margin-bottom: 8px;">
+      ${jobRowsHtml}
+    </table>
+
+    <p style="margin: 20px 0 0; font-size: 14px; color: #6b7280; line-height: 1.6;">
+      These are your top ${totalShown} matches. See all your alerts in the app.
+    </p>
+  `;
+
+  await sendEmail({
+    to: { email: user.email, name: user.username },
+    subject: `⚡ ${totalShown} new job${totalShown !== 1 ? "s" : ""} match your preferences`,
+    htmlContent: renderEmailTemplate({
+      title: `${totalShown} New Job${totalShown !== 1 ? "s" : ""} For You`,
+      greetingName: firstName,
+      bodyHtml,
+      cta: {
+        label: "See all your alerts",
+        url: alertsUrl,
+      },
+      infoHtml:
+        "You're receiving this because you have job alerts enabled. You can turn them off in your preferences.",
+    }),
+  });
+
+  // Mark all shown jobs as emailed
+  await Promise.all(
+    ordered.map((job) =>
+      markJobAlertEmailed({ userId: input.userId, jobId: job.id }),
+    ),
+  );
 };
