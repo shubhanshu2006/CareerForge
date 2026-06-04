@@ -10,8 +10,8 @@ import { FaPlus, FaTimes, FaSave, FaGithub, FaLinkedin, FaGlobe, FaTwitter } fro
 interface Profile {
   firstName?: string;
   lastName?: string;
-  bio?: string;
-  phone?: string;
+  currentLocation?: string;
+  yearsOfExperience?: string;
   skills?: string[];
   socialLinks?: { github?: string; linkedin?: string; website?: string; twitter?: string };
 }
@@ -44,12 +44,28 @@ const inputStyle: React.CSSProperties = {
   boxSizing: "border-box" as const,
 };
 
+const SectionCard = ({ title, children, action }: { title: string; children: React.ReactNode; action?: React.ReactNode }) => (
+  <div style={{ background: "var(--color-surface-2)", border: "1px solid var(--color-border)", borderRadius: "16px", padding: "24px", marginBottom: "20px" }}>
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
+      <h2 style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "16px", color: "var(--color-white)", margin: 0, letterSpacing: "-0.015em" }}>{title}</h2>
+      {action}
+    </div>
+    {children}
+  </div>
+);
+
+const FieldLabel = ({ label }: { label: string }) => (
+  <label style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-white-40)", display: "block", marginBottom: "6px" }}>
+    {label}
+  </label>
+);
+
 export default function ProfilePage() {
   const { getToken, isLoaded } = useAuth();
   const { user } = useUser();
 
   const [profile, setProfile] = useState<Profile>({
-    firstName: "", lastName: "", bio: "", phone: "",
+    firstName: "", lastName: "", currentLocation: "", yearsOfExperience: "",
     skills: [],
     socialLinks: { github: "", linkedin: "", website: "", twitter: "" },
   });
@@ -77,6 +93,10 @@ export default function ProfilePage() {
             ...p,
             firstName,
             lastName,
+            currentLocation: data.profile?.currentLocation ?? "",
+            yearsOfExperience: data.profile?.yearsOfExperience != null
+              ? String(data.profile.yearsOfExperience)
+              : "",
             socialLinks: {
               ...p.socialLinks,
               github: links.github ?? p.socialLinks?.github ?? "",
@@ -101,7 +121,15 @@ export default function ProfilePage() {
         toast.error("Please add first or last name before saving.");
         return;
       }
-      await unwrap(await api.updateProfile({ name }));
+      const payload: Record<string, unknown> = { name };
+      if (profile.currentLocation?.trim()) {
+        payload.currentLocation = profile.currentLocation.trim();
+      }
+      const yoe = parseInt(profile.yearsOfExperience ?? "", 10);
+      if (!Number.isNaN(yoe) && yoe >= 0) {
+        payload.yearsOfExperience = yoe;
+      }
+      await unwrap(await api.updateProfile(payload));
       toast.success("Profile saved!");
     } catch { toast.error("Failed to save profile"); }
     finally { setSaving(false); }
@@ -160,22 +188,6 @@ export default function ProfilePage() {
       </div>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </>
-  );
-
-  const SectionCard = ({ title, children, action }: { title: string; children: React.ReactNode; action?: React.ReactNode }) => (
-    <div style={{ background: "var(--color-surface-2)", border: "1px solid var(--color-border)", borderRadius: "16px", padding: "24px", marginBottom: "20px" }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
-        <h2 style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "16px", color: "var(--color-white)", margin: 0, letterSpacing: "-0.015em" }}>{title}</h2>
-        {action}
-      </div>
-      {children}
-    </div>
-  );
-
-  const FieldLabel = ({ label }: { label: string }) => (
-    <label style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-white-40)", display: "block", marginBottom: "6px" }}>
-      {label}
-    </label>
   );
 
   return (
@@ -245,24 +257,26 @@ export default function ProfilePage() {
               </div>
             </div>
             <div style={{ marginBottom: "16px" }}>
-              <FieldLabel label="Phone" />
+              <FieldLabel label="Current Location" />
               <input
                 style={inputStyle}
-                type="tel"
-                value={profile.phone ?? ""}
-                onChange={(e) => setProfile((p) => ({ ...p, phone: e.target.value }))}
-                placeholder="+1 (555) 000-0000"
+                value={profile.currentLocation ?? ""}
+                onChange={(e) => setProfile((p) => ({ ...p, currentLocation: e.target.value }))}
+                placeholder="e.g. San Francisco, CA"
                 onFocus={(e) => (e.target.style.borderColor = "var(--color-orange)")}
                 onBlur={(e) => (e.target.style.borderColor = "var(--color-border)")}
               />
             </div>
             <div>
-              <FieldLabel label="Bio" />
-              <textarea
-                style={{ ...inputStyle, resize: "vertical", minHeight: "90px", lineHeight: 1.6 } as React.CSSProperties}
-                value={profile.bio ?? ""}
-                onChange={(e) => setProfile((p) => ({ ...p, bio: e.target.value }))}
-                placeholder="A short bio about yourself…"
+              <FieldLabel label="Years of Experience" />
+              <input
+                style={inputStyle}
+                type="number"
+                min={0}
+                max={60}
+                value={profile.yearsOfExperience ?? ""}
+                onChange={(e) => setProfile((p) => ({ ...p, yearsOfExperience: e.target.value }))}
+                placeholder="e.g. 3"
                 onFocus={(e) => (e.target.style.borderColor = "var(--color-orange)")}
                 onBlur={(e) => (e.target.style.borderColor = "var(--color-border)")}
               />
